@@ -114,7 +114,7 @@ body{
 .content .page .childpage .register_page div{
   margin-top: 10px;
 }
-.content .page .childpage .register_page #UserName, #PassWord, #Email{
+.content .page .childpage .register_page #UserName, #PassWord, #Email,#Res-UserName,#Res-PassWord{
   width: 240px;
   height: 30px;
   border: none;
