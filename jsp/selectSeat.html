@@ -25,7 +25,7 @@
 <body>
     <!-- ------------------------------------------------------------------- -->
     <!-- 导航栏 -->
-    <jsp:include page="header.jsp"/>
+    <div id="header"></div>
     
     <!-- 占位符 -->
     <div style="margin-top: 80px;"></div>
@@ -105,13 +105,17 @@
     </div>
 
      <!-- 脚 -->
-     <jsp:include page="footer.jsp"/>
+     <div id="footer"></div>
 
     <!-- ------------------------------------------------------------------- -->
     <script>
         window.onload = function(){
             initBanner(); //初始化巨幕
-            initHeader();
+            $("#header").load("./header.html",function(){
+                initHeader();
+            })
+            
+            $("#footer").load("./footer.html")
         }
 
         //初始化巨幕

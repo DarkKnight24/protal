@@ -277,6 +277,7 @@
 }
 #scheduleadd {
 	width: 400px;
+	margin-top: 25px;
 }
 .layui-laydate{
 	position: fixed !important;
