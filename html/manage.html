@@ -226,6 +226,8 @@
             "<select id='movie' lay-verify=''lay-search><option value=''>请选择上映电影</option>";
         var CinmaStr =
             "<select id='cinma' lay-verify='' lay-search><option value=''>请选择电影院</option>";
+        var HallStr =
+            "<select id='hall' lay-verify='' lay-search><option value=''>请选择影厅</option>";
         var ActorNum = 1;
         var temp, flag;
         var changeticketbtn1 = $(".changeticketBtn");
@@ -356,7 +358,7 @@
                 success: function (obj) {
                     var cinema = obj.data;
                     for (var i = 0; i < cinema.length; i++) {
-                        var cinmaStr = cinema[i].cinemaName;
+                        var cinmaStr = cinema[i].cinemaType;
                         CinmaStr +=
                             "<option value=" +
                             cinema[i].cinemaId +
@@ -370,7 +372,25 @@
                     CinmaStr += "</select>";
                 }
             });
-
+            //初始化影厅
+            var base_ajax = new baseAjax();
+            base_ajax.url = url + "/movie/hall/type/all";
+            base_ajax.async = false;
+            ajax(
+                base_ajax,
+                function (data) {
+                    var hall = data;
+                    for (var i = 0; i < hall.length; i++) {
+                        var hallStr = hall[i].hallName;
+                        HallStr +=
+                            "<option value=" + hall[i].hallId + ">" + hallStr + "</option>";
+                    }
+                    HallStr += "</select>";
+                },
+                function () {
+                    HallStr += "</select>";
+                }
+            );
             // AddUserHtml =
             //     "<h3 class='addusertitle'>用户信息</h3>" +
             //     "<div class='layui-form-item'>" +
@@ -487,20 +507,12 @@
                 "</div>" +
                 "<div class='layui-form-item schedule-div'>" +
                 "<label class='scheduleLabel'>放映厅</label>" +
-                "<div class='layui-form layui-input-inline addselect drop-hall' lay-filter='select'>" +
-                "<select id='select_schedule_hall' name='modules' lay-verify='required'>" +
-                "<option>选择放映厅</option>" +
-                "</select>" +
+                "<div class='layui-form layui-input-inline addselect drop-hall'>" +
+                HallStr +
                 "</div>" +
                 "</div>" +
                 "<div class='layui-form-item schedule-div'>" +
-                "<label class='scheduleLabel'>场次时间</label>" +
-                "<div class='layui-input-inline addselect'>" +
-                "<input type='text' class='layui-input' id='schedule_startTime_Text' placeholder='yyyy-MM-dd HH:mm'>" +
-                "</div>" +
-                "</div>" +
-                "<div class='layui-form-item schedule-div'>" +
-                "<label class='scheduleLabel'>价格</label>" +
+                "<label class='scheduleLabel'>建议价格</label>" +
                 "<div class='layui-input-inline addselect'>" +
                 "<input id='schedule_price_Text' type='text' name='title' lay-verify='title' autocomplete='off' placeholder='money' class='layui-input'>" +
                 "</div>" +
@@ -1976,13 +1988,6 @@
                             },
                             {
                                 field: "schedule_hall",
-                                title: "影院地址",
-                                width: 300,
-                                unresize: true,
-                                templet: "<div>{{d.schedule_hall.hall_cinema.cinema_address}}</div>"
-                            },
-                            {
-                                field: "schedule_hall",
                                 title: "影厅",
                                 width: 100,
                                 unresize: true,
@@ -2011,22 +2016,7 @@
                             },
                             {
                                 field: "orderList",
-                                title: "订单数量",
-                                width: 100,
-                                unresize: true,
-                                align: "center",
-                                templet: "<div>{{d.orderList.length}}</div>"
-                            },
-                            {
-                                field: "schedule_remain",
-                                title: "剩余票数",
-                                width: 100,
-                                align: "center",
-                                unresize: true
-                            },
-                            {
-                                field: "orderList",
-                                title: "场次收入(￥)",
+                                title: "票房(￥)",
                                 width: 120,
                                 align: "center",
                                 unresize: true,
@@ -2034,7 +2024,7 @@
                             },
                             {
                                 title: "操作",
-                                width: 200,
+                                width: 129,
                                 unresize: true,
                                 align: "center",
                                 toolbar: "#schedulebar"
@@ -2074,8 +2064,6 @@
                             data.schedule_hall.hall_cinema.cinema_name +
                             "&nbsp;&nbsp;&nbsp;放映厅：" +
                             data.schedule_hall.hall_name +
-                            "</br>影院地址：" +
-                            data.schedule_hall.hall_cinema.cinema_address +
                             "</br>电影：" +
                             data.schedule_movie.movie_cn_name +
                             "</br>场次：" +
@@ -2142,6 +2130,7 @@
                                 title: "添加场次", //不显示标题栏
                                 closeBtn: false,
                                 area: "400px;",
+
                                 shade: 0.8,
                                 offset: clientHeight / 10,
                                 id: "scheduleadd", //设定一个id，防止重复弹出

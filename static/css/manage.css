@@ -274,10 +274,12 @@
 }
 .schedule-div{
 	margin-left: 25px;
+	margin-top: 20px;
 }
 #scheduleadd {
 	width: 400px;
-	margin-top: 25px;
+	height: 370px;
+	margin-top: 5px;
 }
 .layui-laydate{
 	position: fixed !important;

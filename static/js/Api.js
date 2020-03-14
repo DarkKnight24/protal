@@ -19,7 +19,7 @@ class baseAjax{
     
 
 
-function ajax(baseAjax, func){
+function ajax(baseAjax, func,errorFuc){
     $.ajax({
         async: baseAjax.async,
         type: baseAjax.type,
@@ -29,12 +29,11 @@ function ajax(baseAjax, func){
         data: baseAjax.data,
         error: function (data) {
             //请求失败时被调用的函数 
-            console.log(baseAjax);
-            alert("传输失败:" + data);
+            errorFuc();
         },
-        success: function (data) {
+        success: function (obj) {
             if(func!=null)
-                func(data);
+                func(obj.data);
         }
     });
 }
