@@ -75,11 +75,11 @@
                             <div class="panel-content">
                                 <ul class="movies-list"></ul>
                             </div>
-                            
+
                         </div>
                         <div class="page-navigation" id="movie-page"></div>
                     </div>
-                    
+
                 </div>
                 <!-- 场次管理 -->
                 <div class="three card" style="display: none;">
@@ -705,9 +705,9 @@
                                                         },
                                                         function () {
                                                             layer
-                                                        .closeAll();
+                                                                .closeAll();
                                                             location
-                                                            .reload();
+                                                                .reload();
                                                         }
                                                     );
                                                 } else {
@@ -719,7 +719,7 @@
                                                         },
                                                         function () {
                                                             layer
-                                                        .closeAll();
+                                                                .closeAll();
                                                         }
                                                     );
                                                 }
@@ -776,24 +776,24 @@
                         obj.data.total +
                         "部）</span>"
                     );
-                    layui.use(['laypage','layer'],function(){
-                            var laypage = layui.laypage
-                            ,layer = layui.layer;
-                            laypage.render({
-                                elem: 'movie-page',
-                                pages: obj.data.pages,
-                                limit: obj.data.pageSize,
-                                count: obj.data.total,
-                                curr: obj.data.pageNum,
-                                groups: 5,
-                                jump: function(obj,first){
-                                    var curr = obj.curr;
-                                    if(!first){
-                                        initMovies(curr);
-                                    }
+                    layui.use(['laypage', 'layer'], function () {
+                        var laypage = layui.laypage,
+                            layer = layui.layer;
+                        laypage.render({
+                            elem: 'movie-page',
+                            pages: obj.data.pages,
+                            limit: obj.data.pageSize,
+                            count: obj.data.total,
+                            curr: obj.data.pageNum,
+                            groups: 5,
+                            jump: function (obj, first) {
+                                var curr = obj.curr;
+                                if (!first) {
+                                    initMovies(curr);
                                 }
-                            });
-                        })
+                            }
+                        });
+                    })
                     for (var i = 0; i < list.length; i++) {
                         MoviesListHtml =
                             "<li class='movie'>" +
@@ -810,10 +810,10 @@
                             "<div class='movie-overlay movie-overlay-bg'>" +
                             "<div class='movie-info'>" +
                             "<div class='movie-score'><i class='integer'>" +
-                                list[i].movieScore +
+                            list[i].movieScore +
                             "</i></div>" +
                             "<div class='movie-title movie-title-padding' title=>" +
-                                list[i].movieCnName +
+                            list[i].movieCnName +
                             "</div>'" +
                             "</div>" +
                             "</div>" +
@@ -1086,11 +1086,11 @@
                                                     }
                                                     console.log(
                                                         file
-                                                        );
+                                                    );
                                                 }
                                             });
                                             $("#demo1").attr("src",
-                                            result); //图片链接（base64）
+                                                result); //图片链接（base64）
                                         });
                                     }
                                 });
@@ -1460,7 +1460,8 @@
                                 ],
                                 page: {
                                     layout: ["limit", "count", "prev", "page", "next",
-                                    "skip"], //自定义分页布局
+                                        "skip"
+                                    ], //自定义分页布局
                                     curr: 1, //设定初始在第 1 页
                                     groups: 5, //只显示 5 个连续页码
                                     first: false, //显示首页
@@ -1822,7 +1823,7 @@
                                                 else if (d.order_state == 0)
                                                     return '<div style="color:#ef4238">申请退票</div>';
                                                 else
-                                            return '<div style="color:#5cb85c">已退票</div>';
+                                                    return '<div style="color:#5cb85c">已退票</div>';
                                             }
                                         },
                                         {
@@ -1836,7 +1837,8 @@
                                 ],
                                 page: {
                                     layout: ["limit", "count", "prev", "page", "next",
-                                    "skip"], //自定义分页布局
+                                        "skip"
+                                    ], //自定义分页布局
                                     curr: 1, //设定初始在第 1 页
                                     groups: 5, //只显示 5 个连续页码
                                     first: false, //显示首页
@@ -1934,7 +1936,7 @@
                                                 else if (d.order_state == 0)
                                                     return '<div style="color:#ef4238">申请退票</div>';
                                                 else
-                                            return '<div style="color:#5cb85c">已退票</div>';
+                                                    return '<div style="color:#5cb85c">已退票</div>';
                                             }
                                         },
                                         {
@@ -1948,7 +1950,8 @@
                                 ],
                                 page: {
                                     layout: ["limit", "count", "prev", "page", "next",
-                                    "skip"], //自定义分页布局
+                                        "skip"
+                                    ], //自定义分页布局
                                     curr: 1, //设定初始在第 1 页
                                     groups: 5, //只显示 5 个连续页码
                                     first: false, //显示首页
@@ -1987,7 +1990,7 @@
                     url: url + "/movie/cinema-relation/select-by-param",
                     method: "get",
                     where: {
-                       
+
                     },
                     request: {
                         pageName: 'pageNum',
@@ -1998,15 +2001,17 @@
                     cols: [
                         [{
                                 field: "id",
-                                title: "许可编号",
+                                title: "编号",
                                 width: 100,
                                 unresize: true,
+                                align: "center",
                                 sort: true
                             },
                             {
                                 field: "cinemaType",
                                 title: "影院",
                                 width: 190,
+                                align: "center",
                                 unresize: true,
                                 //templet: "<div>{{d.schedule_hall.hall_cinema.cinema_name}}</div>"
                             },
@@ -2014,20 +2019,21 @@
                                 field: "movieName",
                                 title: "电影",
                                 width: 240,
+                                align: "center",
                                 unresize: true,
                                 //templet: "<div>{{d.schedule_movie.movie_cn_name}}</div>"
                             },
                             {
                                 field: "movieReleaseDate",
                                 title: "上映时间",
-                                width: 180,
+                                width: 130,
                                 unresize: true,
                                 sort: true
                             },
                             {
                                 field: "suggestedPrice",
-                                title: "价格(￥)",
-                                width: 100,
+                                title: "建议价格(￥)",
+                                width: 150,
                                 align: "center",
                                 unresize: true
                             },
@@ -2055,9 +2061,9 @@
                         first: false, //显示首页
                         last: false, //显示尾页
                         limits: [10, 15, 20],
-                        jump: function(obj,first){
+                        jump: function (obj, first) {
                             var curr = obj.curr;
-                            if(!first){
+                            if (!first) {
                                 initSchedule(curr);
                             }
                         }
@@ -2160,18 +2166,11 @@
                                     console.log("queding");
                                     var select_movie_name = $("#select_movie_name").val();
                                     var select_cinema_name = $("#select_cinema_name").val();
-                                    var select_schedule_hall = $("#select_schedule_hall")
-                                        .val();
-                                    var schedule_startTime_Text = $(
-                                        "#schedule_startTime_Text"
-                                    ).val();
                                     var schedule_price_Text = $("#schedule_price_Text")
-                                    .val();
+                                        .val();
                                     if (
                                         select_movie_name == "选择电影" ||
                                         select_cinema_name == "选择影院" ||
-                                        select_schedule_hall == "选择放映厅" ||
-                                        schedule_startTime_Text == "" ||
                                         schedule_price_Text == ""
                                     ) {
                                         layer.alert(
@@ -2186,14 +2185,13 @@
                                     } else {
                                         $.ajax({
                                             type: "post",
-                                            url: url + "/schedule/addSchedule",
+                                            url: url +
+                                                "/movie/cinema-relation/insert",
                                             dataType: "json",
                                             data: {
-                                                movie_name: select_movie_name,
-                                                cinema_name: select_cinema_name,
-                                                hall_name: select_schedule_hall,
-                                                schedule_startTime: schedule_startTime_Text,
-                                                schedule_price: schedule_price_Text
+                                                movieId: select_movie_name,
+                                                cinemaId: select_cinema_name,
+                                                suggestedPrice: schedule_price_Text
                                             },
                                             success: function (result) {
                                                 if (result.code == 0) {
@@ -2205,9 +2203,9 @@
                                                         },
                                                         function () {
                                                             layer
-                                                        .closeAll();
+                                                                .closeAll();
                                                             location
-                                                            .reload();
+                                                                .reload();
                                                         }
                                                     );
                                                 } else {
@@ -2219,10 +2217,15 @@
                                                         },
                                                         function () {
                                                             layer
-                                                        .closeAll();
+                                                                .closeAll();
                                                         }
                                                     );
                                                 }
+                                            },
+                                            error: function () {
+                                                layer.alert(
+                                                    "该许可已存在"
+                                                );
                                             }
                                         });
                                     }
@@ -2270,7 +2273,7 @@
                                                     }
                                                     cinemaJson.cinema = key;
                                                     cinemaJson.hallArr =
-                                                    hallArr;
+                                                        hallArr;
                                                 }
                                                 cinemaJsonArr.push(cinemaJson);
                                             }
@@ -2422,7 +2425,8 @@
                                 ],
                                 page: {
                                     layout: ["limit", "count", "prev", "page", "next",
-                                    "skip"], //自定义分页布局
+                                        "skip"
+                                    ], //自定义分页布局
                                     curr: 1, //设定初始在第 1 页
                                     groups: 5, //只显示 5 个连续页码
                                     first: false, //显示首页
@@ -2539,7 +2543,8 @@
                                 ],
                                 page: {
                                     layout: ["limit", "count", "prev", "page", "next",
-                                    "skip"], //自定义分页布局
+                                        "skip"
+                                    ], //自定义分页布局
                                     curr: 1, //设定初始在第 1 页
                                     groups: 5, //只显示 5 个连续页码
                                     first: false, //显示首页
