@@ -765,7 +765,7 @@
                 url: url + "/movie/findByParam",
                 dataType: "json",
                 data: {
-                    "pageNum": pageNum,
+                    "currentPage": pageNum,
                     "pageSize": 10,
                     "movieState": 1
                 },
@@ -784,7 +784,7 @@
                             pages: obj.data.pages,
                             limit: obj.data.pageSize,
                             count: obj.data.total,
-                            curr: obj.data.pageNum,
+                            curr: obj.data.currentPage,
                             groups: 5,
                             jump: function (obj, first) {
                                 var curr = obj.curr;
@@ -1978,7 +1978,7 @@
         }
 
         //初始化场次管理界面
-        function initSchedule(pageNum) {
+        function initSchedule() {
             var ScheduleStatus = 0; //0：上映      1：下架
             //场次列表
             layui.use(["table", "form"], function () {
@@ -1993,7 +1993,7 @@
 
                     },
                     request: {
-                        pageName: 'pageNum',
+                        pageName: 'currentPage',
                         limitName: 'pageSize'
                     },
                     toolbar: "#scheduletoolbar",
@@ -2055,7 +2055,7 @@
                         ]
                     ],
                     page: {
-                        layout: ["limit", "count", "prev", "pageNum", "next", "skip"], //自定义分页布局
+                        layout: ["limit", "count", "prev", "page", "next", "skip"], //自定义分页布局
                         curr: 1, //设定初始在第 1 页
                         groups: 5, //只显示 5 个连续页码
                         first: false, //显示首页
