@@ -295,7 +295,8 @@
                     movieCountry = $(obj).attr("val");
                     break;
                 case "year":
-                    releaseTime = obj.text;
+                    if(obj.text!='全部')
+                        releaseTime = obj.text;
                     break;
             }
             $(obj).parent("li").addClass("active");
