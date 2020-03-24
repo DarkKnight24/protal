@@ -90,13 +90,15 @@
                     </div>
                 </div>
 
-                <div class="movies-list">
+                <div class="movies-div">
                     <ul class="movie-list">
-
+                        
                     </ul>
+                    <div class="page-navigation" id="movie-page"></div>
                 </div>
             </div>
         </div>
+        
     </div>
 
     <!-- 脚 -->
@@ -106,16 +108,16 @@
     <script>
         var clientHeight = document.documentElement.clientHeight;
         var clientWidth = document.documentElement.clientWidth;
-        var type;
-        var area = null;
-        var year = null;
+        var movieType;
+        var movieCountry = null;
+        var releaseTime = null;
         var movielist = $(".movie-list");
         var order = "热门";
         window.onload = function () {
             funav(); //副导航栏
             initHeader();
             initTags(); //标签
-            //initMovieList(); //电影列表
+            initMovieList(); //电影列表
             initClass(); //布局
             $("#header").load("./header.html",function(){
                 initHeader();
@@ -134,77 +136,7 @@
 
         //初始化电影列表
         function initMovieList() {
-            if (getUrlParams("type") == "全部" || getUrlParams("type") == null) {
-                $.ajax({
-                    type: "post",
-                    url: url + "/movie/sortAllMovies",
-                    data: {
-                        order: order
-                    },
-                    dataType: "json",
-                    success: function (obj) {
-                        console.log(obj);
-                        for (var i = 0; i < obj.count; i++) {
-                            movielist.append(
-                                "<li> <div class=\"movie-item\"> <a href=\"./buyTickets.jsp?movie_id=" +
-                                obj.data[i].movie_id +
-                                "\" target=\"_blank\"> <div class=\"movie-poster\"> <img src=\"" + obj
-                                .data[i].movie_picture + "\"> </div> </a>" +
-                                "<div class=\"channel-action channel-action-sale\"> <a>购票<a/> </div> <div class=\"movie-ver\"></div> </div>" +
-                                "<div class=\"channel-detail movie-item-title\" title=\"" + obj.data[i]
-                                .movie_cn_name + "\">" +
-                                "<a href=\"./movieDetail.jsp?movie_id=" + obj.data[i].movie_id +
-                                "\" target=\"_blank\">" + obj.data[i].movie_cn_name + "</a> </div>" +
-                                "<div class=\"channel-detail channel-detail-orange\"> <i class=\"integer\">" +
-                                obj.data[i].movie_score + "</i> </div>" +
-                                "</li>"
-                            );
-                        }
-                    },
-                    error: function () {
-                        alert("network error!");
-                    }
-                });
-            } else {
-                $.ajax({
-                    type: "post",
-                    url: url + "/movie/findMoviesByType",
-                    data: {
-                        type: type
-                    },
-                    dataType: "json",
-                    success: function (obj) {
-                        console.log(obj);
-                        if (obj.count > 0) {
-                            for (var i = 0; i < obj.count; i++) {
-                                movielist.append(
-                                    "<li> <div class=\"movie-item\"> <a href=\"./buyTickets.jsp?movie_id=" +
-                                    obj.data[i].movie_id +
-                                    "\" target=\"_blank\"> <div class=\"movie-poster\"> <img src=\"" +
-                                    obj.data[i].movie_picture + "\"> </div> </a>" +
-                                    "<div class=\"channel-action channel-action-sale\"> <a>购票<a/> </div> <div class=\"movie-ver\"></div> </div>" +
-                                    "<div class=\"channel-detail movie-item-title\" title=\"" + obj
-                                    .data[i].movie_cn_name + "\">" +
-                                    "<a href=\"./movieDetail.jsp?movie_id=" + obj.data[i].movie_id +
-                                    "\" target=\"_blank\">" + obj.data[i].movie_cn_name +
-                                    "</a> </div>" +
-                                    "<div class=\"channel-detail channel-detail-orange\"> <i class=\"integer\">" +
-                                    obj.data[i].movie_score + "</i> </div>" +
-                                    "</li>"
-                                );
-                            }
-                        } else {
-                            //movielist.append("<div style=\"height:320px\"><p style=\"text-align:center;padding:100px 0; font-size:24px;\">查无数据...</p></div>");
-                            movielist.append(
-                                "<div style=\"margin-top:40px;font-size:18px;color:#333;height:190px;\">抱歉，没有找到相关结果，请尝试用其他条件筛选。</div>"
-                            );
-                        }
-                    },
-                    error: function () {
-                        alert("network error!");
-                    }
-                })
-            }
+            getMovieByParam(movieCountry,movieType,releaseTime);
             var radio = $('.sort-control-group');
             for (var i = 0; i < radio.length; i++) {
                 // var zz = radio[i].children[0];
@@ -306,7 +238,7 @@
                         var typeStr = TypeStr[i].typeName
                         tagsType.append(
                             "<li class='type'>" +
-                            "<a href='#' onclick=tapChange(this)>" +
+                            "<a href='#' onclick=tapChange(this) val="+TypeStr[i].id+">" +
                             typeStr +
                             "</a>" +
                             "</li>"
@@ -324,7 +256,7 @@
                         var areaStr = AreaStr[i].countryName
                         tagsArea.append(
                             "<li class='area'>" +
-                            "<a href='#' onclick=tapChange(this)>" +
+                            "<a href='#' onclick=tapChange(this) val="+AreaStr[i].id+">" +
                             areaStr +
                             "</a>" +
                             "</li>"
@@ -357,19 +289,81 @@
             $("." + className).removeClass("active")
             switch (className) {
                 case "type":
-                    type = obj.text;
+                    movieType = $(obj).attr("val");
                     break;
                 case "area":
-                    area = obj.text;
+                    movieCountry = $(obj).attr("val");
                     break;
                 case "year":
-                    year = obj.text;
+                    releaseTime = obj.text;
                     break;
             }
             $(obj).parent("li").addClass("active");
+            movielist.empty();
+            getMovieByParam(movieCountry,movieType,releaseTime)
+        }
+        function getMovieByParam(movieCountry,movieType,releaseTime){
+            $.ajax({
+                    type: "get",
+                    url: url + "/movie/findByParam",
+                    data: {
+                        "movieCountry":movieCountry,
+                        "movieType":movieType,
+                        "releaseTime":releaseTime,
+                        "pageSize": 12
+                    },
+                    dataType: "json",
+                    success: function (obj) {
+                        console.log(obj);
+                        var list = obj.data.list;
+                        if(list.length<=0){
+                            movielist.append(
+                                "<div style=\"margin-top:40px;font-size:18px;color:#333;height:190px;\">抱歉，没有找到相关结果，请尝试用其他条件筛选。</div>"
+                            );
+                            return;
+                        }
+                        for (var i = 0; i < list.length; i++) {
+                            movielist.append(
+                                "<li> <div class=\"movie-item\"> <a href=\"./buyTickets.html?movie_id=" +
+                                    list[i].movieId +
+                                "\" target=\"_blank\"> <div class=\"movie-poster\"> <img src=\"" + list[i].moviePicture + "\"> </div> </a>" +
+                                "<div class=\"channel-action channel-action-sale\"> <a>购票<a/> </div> <div class=\"movie-ver\"></div> </div>" +
+                                "<div class=\"channel-detail movie-item-title\" title=\"" + list[i]
+                                .movieCnName + "\">" +
+                                "<a href=\"./movieDetail.html?movie_id=" + list[i].movieId +
+                                "\" target=\"_blank\">" + list[i].movieCnName + "</a> </div>" +
+                                "<div class=\"channel-detail channel-detail-orange\"> <i class=\"integer\">" +
+                                    list[i].movieScore + "</i> </div>" +
+                                "</li>"
+                            );
+                        }
+                        movielist.append("<div style='clear:both;''></div>");
+                        layui.use(['laypage', 'layer'], function () {
+                        var laypage = layui.laypage,
+                            layer = layui.layer;
+                        laypage.render({
+                            elem: 'movie-page',
+                            pages: obj.data.pages,
+                            limit: obj.data.pageSize,
+                            count: obj.data.total,
+                            curr: obj.data.currentPage,
+                            groups: 5,
+                            jump: function (obj, first) {
+                                var curr = obj.curr;
+                                if (!first) {
+                                    initMovies(curr);
+                                }
+                            }
+                        });
+                    })
+                    },
+                    error: function () {
+                        alert("network error!");
+                    }
+                });
         }
     </script>
-    <!-- ------------------------------------------------------------------- -->
+    
 </body>
 
 </html>

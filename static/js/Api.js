@@ -1,4 +1,4 @@
-var urlHead = "http://localhost:8084";
+var urlHead = "http://huaknight.icu:8084";
 
 var urlFoot = "/api";
 

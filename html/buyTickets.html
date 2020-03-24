@@ -26,7 +26,7 @@
 <body>
     <!-- ------------------------------------------------------------------- -->
     <!-- 导航栏 -->
-    <object style="border:0px; width: 100%; height: 80px;" type="text/x-scriptlet" data="header.html"></object>
+    <div id="header"></div>
     <!-- 占位符 -->
     <!-- <div style="margin-top: 80px;"></div> -->
 
@@ -141,7 +141,7 @@
     </div>
 
     <!-- 脚 -->
-    <object style="border:0px; width: 100%;" type="text/x-scriptlet" data="footer.html"></object>
+    <div id="footer"></div>
 
     <!-- ------------------------------------------------------------------- -->
     <script>
@@ -156,11 +156,15 @@
         var CinemaLength;
 
         window.onload = function(){
-            initHeader();
             initParams(); //参数
             initBanner(); //巨幕
             initHtml(); //HTML
             initTags(); //标签和分页
+            $("#header").load("./header.html",function(){
+                initHeader();
+            })
+            
+            $("#footer").load("./footer.html")
         }
 
         //初始化HTML

@@ -26,7 +26,7 @@
 <body>
     <!-- ------------------------------------------------------------------- -->
     <!-- 导航栏 -->
-    <jsp:include page="header.jsp"/>
+    <div id="header"></div>
    
     <!-- 占位符 -->
     <div style="margin-top: 80px;"></div>
@@ -143,7 +143,7 @@
     </div>
 
     <!-- 脚 -->
-    <jsp:include page="footer.jsp"/>
+    <div id="footer"></div>
 
     <!-- ------------------------------------------------------------------- -->
     <script>
@@ -152,11 +152,15 @@
         var ScoreHtml;
 
         window.onload = function(){
-            initHeader();
             initHtml(); //HTML
             initBanner(); //巨幕
             intitActor(); //演职人员
             init_comment(); //评论
+            $("#header").load("./header.html",function(){
+                initHeader();
+            })
+            
+            $("#footer").load("./footer.html")
         }
 
         //初始化HTML

@@ -232,7 +232,7 @@
 
                 <div class="panel-header">
                     <span class="panel-more">
-                        <a href="./movieList.jsp" class="textcolor_red" data-act="all-playingMovie-click">
+                        <a href="./movieList.html" class="textcolor_red" data-act="all-playingMovie-click">
                             <span>全部</span>
                         </a>
                         <span class="panel-arrow panel-arrow-red"></span>
@@ -246,7 +246,7 @@
                 </div>
                 <div class="panel">
                     <span class="panel-more">
-                        <a href="./movieList.jsp" class="textcolor_red" data-act="all-upcomingMovie-click">
+                        <a href="./movieList.html" class="textcolor_red" data-act="all-upcomingMovie-click">
                             <span>全部</span>
                         </a>
                         <span class="panel-arrow panel-arrow-blue"></span>
@@ -272,10 +272,10 @@
         window.onload = function () {
             initHostMovie(); //初始化正在热映和即将上映电影
             //initBoxOffice(); //初始化总体票房s
-            $("#header").load("./header.html",function(){
+            $("#header").load("./header.html", function () {
                 initHeader();
             })
-            
+
             $("#footer").load("./footer.html")
         }
 
@@ -303,15 +303,18 @@
             var TempName;
 
             $.ajax({
-                type: 'post',
-                url: url + "/movie/findAllMovies",
+                type: 'get',
+                url: url + "/movie/findByParam",
                 dataType: 'json',
-                data: {},
+                data: {
+                    "pageSize": 8
+                },
                 success: function (obj) {
                     console.log(obj);
-                    HotNum.append("<span class=\"textcolor_red\">正在热映（" + obj.data.length + "部）</span>");
-                    if (obj.data.length < 8) {
-                        ListLength = obj.data.length;
+                    var list = obj.data.list;
+                    HotNum.append("<span class=\"textcolor_red\">正在热映（" + obj.data.total + "部）</span>");
+                    if (obj.data.total < 8) {
+                        ListLength = obj.data.total;
                     } else {
                         ListLength = 8;
                     }
@@ -319,22 +322,22 @@
                         htmlHot =
                             "<li>" +
                             "<div class=\"movie-item\">" +
-                            "<a href=\"javascript:void(0)\" target=\"_blank\" data-act=\"playingMovie-click\" data-val=\"" +
-                            obj.data[i].movie_id + "\">" +
+                            "<a href=\"./movieDetail.html?movie_id="+list[i].movieId+"\" target=\"_blank\" data-act=\"playingMovie-click\" data-val=\"" +
+                            list[i].movieId + "\">" +
                             "<div class=\"movie-poster\" style=\"cursor:default;\">" +
-                            "<img id=\"moive_picture\" src=\"" + obj.data[i].movie_picture + "\">" +
+                            "<img id=\"moive_picture\" src=\"" + list[i].moviePicture + "\">" +
                             "<div class=\"movie-overlay movie-overlay-bg\">" +
                             "<div class=\"movie-info\">" +
-                            "<div class=\"movie-score\"><i id=\"moive_score\" class=\"integer\">" + obj
-                            .data[i].movie_score + "</i></div>" +
-                            "<div class=\"movie-title movie-title-padding\" title=\"" + obj.data[i]
-                            .movie_cn_name + "\">" + obj.data[i].movie_cn_name + "</div>" +
+                            "<div class=\"movie-score\"><i id=\"moive_score\" class=\"integer\">" + list[i]
+                            .movieScore + "</i></div>" +
+                            "<div class=\"movie-title movie-title-padding\" title=\"" + list[i]
+                            .movieCnName + "\">" + list[i].movieCnName + "</div>" +
                             "</div>" +
                             "</div>" +
                             "</div>" +
                             "</a>" +
                             "<div class=\"movie-detail movie-detail-strong movie-sale\">" +
-                            "<a href=\"./buyTickets.jsp?movie_id=" + obj.data[i].movie_id +
+                            "<a href=\"./buyTickets.html?movie_id=" + list[i].movieId +
                             "\" class=\"active\" target=\"_blank\" data-act=\"salePlayingMovie-click\" data-val=\"{movieid:42964}\">购 票</a>" +
                             "</div>" +
                             "</div>" +
@@ -343,9 +346,24 @@
                     }
 
 
-                    OnNum.append("<span class=\"textcolor_blue\">即将上映（" + obj.data1.length + "部）</span>");
-                    if (obj.data1.length < 8) {
-                        ListLength = obj.data1.length;
+
+                }
+            });
+
+            $.ajax({
+                type: 'get',
+                url: url + "/movie/findByParam",
+                dataType: 'json',
+                data: {
+                    "pageSize": 8,
+                    "movieState": 2
+                },
+                success: function (obj) {
+                    console.log(obj);
+                    var list = obj.data.list;
+                    OnNum.append("<span class=\"textcolor_blue\">即将上映（" + obj.data.total + "部）</span>");
+                    if (list.length < 8) {
+                        ListLength = list.length;
                     } else {
                         ListLength = 8;
                     }
@@ -354,16 +372,15 @@
                         htmlOn =
                             "<li>" +
                             "<div class=\"movie-item\">" +
-                            "<a href=\"javascript:void(0)\" target=\"_blank\" data-act=\"playingMovie-click\" data-val=\"" +
-                            obj.data1[i].movie_id + "\">" +
+                            "<a href=\"./movieDetail.html?movie_id="+list[i].movieId+"\" target=\"_blank\" data-act=\"playingMovie-click\" data-val=\"" +
+                            list[i].movieId + "\">" +
                             "<div class=\"movie-poster\" style=\"cursor:default;\">" +
-                            "<img id=\"moive_picture\" src=\"" + obj.data1[i].movie_picture + "\">" +
+                            "<img id=\"moive_picture\" src=\"" + list[i].moviePicture + "\">" +
                             "<div class=\"movie-overlay movie-overlay-bg\">" +
                             "<div class=\"movie-info\">" +
-                            "<div class=\"movie-score\"><i id=\"moive_score\" class=\"integer\">" + obj
-                            .data1[i].movie_score + "</i></div>" +
-                            "<div class=\"movie-title movie-title-padding\" title=\"" + obj.data1[i]
-                            .movie_cn_name + "\">" + obj.data1[i].movie_cn_name + "</div>" +
+                            "<div class=\"movie-score\"><i id=\"moive_score\" class=\"integer\">" + list[i].movieScore + "</i></div>" +
+                            "<div class=\"movie-title movie-title-padding\" title=\"" + list[i]
+                            .movieCnName + "\">" + list[i].movieCnName + "</div>" +
                             "</div>" +
                             "</div>" +
                             "</div>" +
@@ -398,7 +415,7 @@
                     }
                     initBoxOffice(obj);
                 }
-            });
+            })
         }
 
         //初始化总体票房
