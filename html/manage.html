@@ -39,7 +39,7 @@
                 </div>
                 <!-- <a class="cardId">用户管理</a> -->
                 <a class="cardId">电影管理</a>
-                <a class="cardId">场次管理</a>
+                <a class="cardId">放映许可</a>
                 <a class="cardId">评论管理</a>
                 <a class="cardId">订单管理</a>
                 <a class="cardId">票房统计</a>
@@ -75,13 +75,16 @@
                             <div class="panel-content">
                                 <ul class="movies-list"></ul>
                             </div>
+                            
                         </div>
+                        <div class="page-navigation" id="movie-page"></div>
                     </div>
+                    
                 </div>
                 <!-- 场次管理 -->
                 <div class="three card" style="display: none;">
                     <div>
-                        <div class="title">场次管理</div>
+                        <div class="title">电影放映许可</div>
                         <hr />
                     </div>
                     <!-- 场次列表 -->
@@ -152,7 +155,7 @@
     </script>
     <script type="text/html" id="scheduletoolbar">
         <div class="layui-btn-container addbtn">
-            <button class="layui-btn layui-btn-warm layui-btn-sm" lay-event="scheduleadd">添加场次</button>
+            <button class="layui-btn layui-btn-warm layui-btn-sm" lay-event="scheduleadd">添加许可</button>
         </div>
         <div class="schedulecheck">
             <input id="scheduletext" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入电影名"
@@ -492,7 +495,7 @@
                 "</div></div>";
 
             addScheduleContent =
-                "<h3 class='addtitle'>场次信息</h3>" +
+                "<h3 class='addtitle'>电影许可</h3>" +
                 "<div class='layui-form'><div class='layui-form-item schedule-div'>" +
                 "<label class='scheduleLabel'>电影</label>" +
                 "<div class='layui-form layui-input-inline addselect drop-cinema' lay-filter='selectMovie'>" +
@@ -503,12 +506,6 @@
                 "<label class='scheduleLabel'>影院</label>" +
                 "<div class='layui-form layui-input-inline addselect drop-cinema'>" +
                 CinmaStr +
-                "</div>" +
-                "</div>" +
-                "<div class='layui-form-item schedule-div'>" +
-                "<label class='scheduleLabel'>放映厅</label>" +
-                "<div class='layui-form layui-input-inline addselect drop-hall'>" +
-                HallStr +
                 "</div>" +
                 "</div>" +
                 "<div class='layui-form-item schedule-div'>" +
@@ -758,42 +755,65 @@
         }
 
         //初始化电影管理界面
-        function initMovies() {
+        function initMovies(pageNum) {
             var MoviesNum = $(".two").find(".panel-title");
             MoviesNum.empty();
             var MovieLi = $(".two").find(".movies-list");
             MovieLi.empty();
             $.ajax({
                 type: "get",
-                url: url + "/movie/find-all",
+                url: url + "/movie/findByParam",
                 dataType: "json",
-                data: {},
+                data: {
+                    "pageNum": pageNum,
+                    "pageSize": 10,
+                    "movieState": 1
+                },
                 success: function (obj) {
+                    var list = obj.data.list;
                     MoviesNum.append(
                         "<span class='textcolor_red'>正在热映（" +
-                        obj.data.length +
+                        obj.data.total +
                         "部）</span>"
                     );
-                    for (var i = 0; i < obj.data.length; i++) {
+                    layui.use(['laypage','layer'],function(){
+                            var laypage = layui.laypage
+                            ,layer = layui.layer;
+                            laypage.render({
+                                elem: 'movie-page',
+                                pages: obj.data.pages,
+                                limit: obj.data.pageSize,
+                                count: obj.data.total,
+                                curr: obj.data.pageNum,
+                                groups: 5,
+                                jump: function(obj,first){
+                                    var curr = obj.curr;
+                                    if(!first){
+                                        initMovies(curr);
+                                    }
+                                }
+                            });
+                        })
+                    for (var i = 0; i < list.length; i++) {
                         MoviesListHtml =
                             "<li class='movie'>" +
                             "<div class='movie-item'>" +
                             "<a href='javascript:void(0)' target='_blank' data-act='playingMovie-click' data-val='" +
-                            obj.data[i].movieId +
+                            list[i].movieId +
                             "'>" +
                             "<div class='movie-poster'>" +
                             "<img src='" +
-                            obj.data[i].moviePicture +
+                            list[i].moviePicture +
                             "' onclick='movieDetail(" +
-                            obj.data[i].movieId +
+                            list[i].movieId +
                             ")'>" +
                             "<div class='movie-overlay movie-overlay-bg'>" +
                             "<div class='movie-info'>" +
                             "<div class='movie-score'><i class='integer'>" +
-                            obj.data[i].movieScore +
+                                list[i].movieScore +
                             "</i></div>" +
                             "<div class='movie-title movie-title-padding' title=>" +
-                            obj.data[i].movieCnName +
+                                list[i].movieCnName +
                             "</div>'" +
                             "</div>" +
                             "</div>" +
@@ -802,13 +822,13 @@
                             "<div class='moive-btn'>" +
                             "<div class='movies-detail movie-detail-strong movie-sale'>" +
                             "<a class='active' onclick='addConfirm(" +
-                            obj.data[i].movieId +
+                            list[i].movieId +
                             ")' target='_blank' data-act='salePlayingMovie-click' data-val=''>修改</a>" +
                             "</div>" +
                             "<div class='movies-detail movie-detail-strong movie-sale'>" +
                             "<span id='deleteId' style='display:none;'>${u.id}</span>" +
                             "<a class='active' onclick='deleteConfirm(this," +
-                            obj.data[i].movieId +
+                            list[i].movieId +
                             ")' data-act='salePlayingMovie-click' id='delete'>下架</a>" +
                             "</div>" +
                             "</div>" +
@@ -1955,7 +1975,7 @@
         }
 
         //初始化场次管理界面
-        function initSchedule() {
+        function initSchedule(pageNum) {
             var ScheduleStatus = 0; //0：上映      1：下架
             //场次列表
             layui.use(["table", "form"], function () {
@@ -1964,67 +1984,64 @@
 
                 table.render({
                     elem: "#schedule_table_id",
-                    url: url + "/schedule/findAllScheduleByState",
-                    method: "post",
+                    url: url + "/movie/cinema-relation/select-by-param",
+                    method: "get",
                     where: {
-                        schedule_state: 1
+                       
+                    },
+                    request: {
+                        pageName: 'pageNum',
+                        limitName: 'pageSize'
                     },
                     toolbar: "#scheduletoolbar",
-                    title: "场次列表",
+                    title: "许可列表",
                     cols: [
                         [{
-                                field: "schedule_id",
-                                title: "场次编号",
+                                field: "id",
+                                title: "许可编号",
                                 width: 100,
                                 unresize: true,
                                 sort: true
                             },
                             {
-                                field: "schedule_hall",
+                                field: "cinemaType",
                                 title: "影院",
-                                width: 240,
+                                width: 190,
                                 unresize: true,
-                                templet: "<div>{{d.schedule_hall.hall_cinema.cinema_name}}</div>"
+                                //templet: "<div>{{d.schedule_hall.hall_cinema.cinema_name}}</div>"
                             },
                             {
-                                field: "schedule_hall",
-                                title: "影厅",
-                                width: 100,
-                                unresize: true,
-                                templet: "<div>{{d.schedule_hall.hall_name}}</div>"
-                            },
-                            {
-                                field: "schedule_movie",
+                                field: "movieName",
                                 title: "电影",
                                 width: 240,
                                 unresize: true,
-                                templet: "<div>{{d.schedule_movie.movie_cn_name}}</div>"
+                                //templet: "<div>{{d.schedule_movie.movie_cn_name}}</div>"
                             },
                             {
-                                field: "schedule_startTime",
-                                title: "放映时间",
+                                field: "movieReleaseDate",
+                                title: "上映时间",
                                 width: 180,
                                 unresize: true,
                                 sort: true
                             },
                             {
-                                field: "schedule_price",
+                                field: "suggestedPrice",
                                 title: "价格(￥)",
                                 width: 100,
                                 align: "center",
                                 unresize: true
                             },
                             {
-                                field: "orderList",
+                                field: "boxOffice",
                                 title: "票房(￥)",
-                                width: 120,
+                                width: 170,
                                 align: "center",
                                 unresize: true,
-                                templet: "<div>{{d.orderList.length * d.schedule_price}}</div>"
+                                //templet: "<div>{{d.orderList.length * d.schedule_price}}</div>"
                             },
                             {
                                 title: "操作",
-                                width: 129,
+                                width: 230,
                                 unresize: true,
                                 align: "center",
                                 toolbar: "#schedulebar"
@@ -2032,23 +2049,29 @@
                         ]
                     ],
                     page: {
-                        layout: ["limit", "count", "prev", "page", "next", "skip"], //自定义分页布局
+                        layout: ["limit", "count", "prev", "pageNum", "next", "skip"], //自定义分页布局
                         curr: 1, //设定初始在第 1 页
                         groups: 5, //只显示 5 个连续页码
                         first: false, //显示首页
                         last: false, //显示尾页
-                        limits: [10, 15, 20]
+                        limits: [10, 15, 20],
+                        jump: function(obj,first){
+                            var curr = obj.curr;
+                            if(!first){
+                                initSchedule(curr);
+                            }
+                        }
                     },
                     response: {
-                        statusCode: 0 //重新规定成功的状态码为 200，table 组件默认为 0
+                        statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
                     },
                     parseData: function (res) {
                         //将原始数据解析成 table 组件所规定的数据
                         return {
                             code: res.code, //解析接口状态
                             msg: res.msg, //解析提示文本
-                            count: res.count, //解析数据长度
-                            data: res.data //解析数据列表
+                            count: res.data.total, //解析数据长度
+                            data: res.data.list //解析数据列表
                         };
                     }
                 });
@@ -2059,17 +2082,15 @@
                         console.log(obj);
                         layer.msg(
                             "编号：" +
-                            data.schedule_id +
+                            data.id +
                             "</br>影院：" +
-                            data.schedule_hall.hall_cinema.cinema_name +
-                            "&nbsp;&nbsp;&nbsp;放映厅：" +
-                            data.schedule_hall.hall_name +
+                            data.cinemaType +
                             "</br>电影：" +
-                            data.schedule_movie.movie_cn_name +
-                            "</br>场次：" +
-                            data.schedule_startTime +
+                            data.movieName +
+                            "</br>上映时间：" +
+                            data.movieReleaseDate +
                             "&nbsp;&nbsp;&nbsp;价格：" +
-                            data.schedule_price, {
+                            data.suggestedPrice, {
                                 offset: clientHeight / 5
                             }
                         );
@@ -2127,7 +2148,7 @@
 
                             layer.open({
                                 type: 1,
-                                title: "添加场次", //不显示标题栏
+                                title: "添加许可", //不显示标题栏
                                 closeBtn: false,
                                 area: "400px;",
 

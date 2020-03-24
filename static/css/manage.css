@@ -222,7 +222,11 @@
 	float: left;
 }
 
-
+.page-navigation{
+	position: relative;
+	top: 15%;
+	padding-left: 30%;
+}
 
 
 
@@ -278,7 +282,7 @@
 }
 #scheduleadd {
 	width: 400px;
-	height: 370px;
+	height: 300px;
 	margin-top: 5px;
 }
 .layui-laydate{
