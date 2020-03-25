@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
     <script src="../static/bootstrap/js/jquery-3.3.1.min.js"></script>
     <script src="../static/bootstrap/js/bootstrap.min.js"></script>
 
-    <link rel="icon" type="image/x-icon" href="../static/images/logo.ico"/>
+    <link rel="icon" type="image/x-icon" href="../static/images/logo.ico" />
     <link rel="stylesheet" type="text/css" href="../static/css/header.css">
     <link rel="stylesheet" type="text/css" href="../static/css/main.css">
     <link rel="stylesheet" type="text/css" href="../static/css/footer.css">
@@ -18,17 +19,19 @@
     <link rel="stylesheet" type="text/css" href="../static/css/movieDetail.css">
     <script src="../static/js/header.js" charset="utf-8"></script>
     <script src="../static/js/Api.js"></script>
-
     <script src="../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript"
+        src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=yUT8HC27Yswf2p097DpLzBeWlRhf25Te"></script>
     <link rel="stylesheet" href="../static/layui/css/layui.css" media="all">
     <title>鹰眼电影-选影院</title>
 </head>
+
 <body>
     <!-- ------------------------------------------------------------------- -->
     <!-- 导航栏 -->
     <div id="header"></div>
     <!-- 占位符 -->
-    <!-- <div style="margin-top: 80px;"></div> -->
+    <div style="margin-top: 80px;"></div>
 
     <!-- 巨幕 -->
     <div class="banner2">
@@ -38,7 +41,7 @@
                     <!-- 图片 -->
                 </div>
             </div>
-            
+
             <div class="celeInfo-right clearfix">
                 <div class="movie-brief-container">
                     <!-- 上 -->
@@ -76,7 +79,7 @@
                                 </span>
                             </div>
                         </div>
-                    </div>   
+                    </div>
 
                     <div class="movie-index">
                         <p class="movie-index-title">累计票房</p>
@@ -125,16 +128,16 @@
                             <!-- 特殊厅 -->
                         </ul>
                     </li>
-            
+
                 </ul>
-            </div>	
+            </div>
             <!-- 列表 -->
             <div class="cinemas-list">
-                <h2 class="cinemas-list-header">影院列表</h2>   
+                <h2 class="cinemas-list-header">影院列表</h2>
             </div>
             <!-- 分页 -->
             <div class="cinema-pager">
-                <ul class="list-pager">	
+                <ul class="list-pager">
                 </ul>
             </div>
         </div>
@@ -145,40 +148,42 @@
 
     <!-- ------------------------------------------------------------------- -->
     <script>
+        var localInfomation = JSON.parse(localStorage.getItem("LocationInformation"));
         var clientHeight = document.documentElement.clientHeight;
         var movie_id;
         var date;
-        var brand;
+        var cinema;
         var area;
         var hall;
         var page;
         var ScoreHtml;
         var CinemaLength;
 
-        window.onload = function(){
+        window.onload = function () {
+
             initParams(); //参数
             initBanner(); //巨幕
             initHtml(); //HTML
             initTags(); //标签和分页
-            $("#header").load("./header.html",function(){
+            $("#header").load("./header.html", function () {
                 initHeader();
+
             })
-            
+
             $("#footer").load("./footer.html")
         }
 
         //初始化HTML
-        function initHtml(){
-            ScoreHtml = 
+        function initHtml() {
+            ScoreHtml =
                 "<div style=\"text-align:center; margin:30px 0;\">" +
-                    "<div id=\"GiveScore\"></div>" +
-                    "<p style=\"color:#888;\">点击星星进行评分</p>" +
-                "</div>"
-            ;
+                "<div id=\"GiveScore\"></div>" +
+                "<p style=\"color:#888;\">点击星星进行评分</p>" +
+                "</div>";
         }
 
         //初始化巨幕
-        function initBanner(){
+        function initBanner() {
             movie_id = getUrlParams('movie_id');
             var avatar = $(".avatar-shadow");
             var movieBriefContainer = $(".movie-brief-container");
@@ -189,35 +194,38 @@
             var StonefontTemp;
 
             $.ajax({
-                type:'post',
-                url: url + "/movie/findMovieById",
-                dataType:'json',
+                type: 'get',
+                url: url + "/movie/detail/" + movie_id,
+                dataType: 'json',
                 data: {
-                    movie_id: movie_id
+
                 },
-                success:function (obj) {
-                    StonefontTemp = obj.data.movie_boxOffice;
+                success: function (obj) {
+                    StonefontTemp = obj.data.movieBoxoffice;
                     StonefontTemp += "万";
-                    avatar.append("<img class=\"avatar\" src=\"" + obj.data.movie_picture + "\" alt=\"\">");
+                    avatar.append("<img class=\"avatar\" src=\"" + obj.data.moviePicture + "\" alt=\"\">");
                     movieBriefContainer.append(
-                    "<h3 class=\"name\">" + obj.data.movie_cn_name + "</h3>" +
-                    "<div class=\"ename ellipsis\">" + obj.data.movie_fg_name + "</div>" +
-                    "<ul>" +
-                        "<li class=\"ellipsis\">" + obj.data.movie_type + "</li>" +
-                        "<li class=\"ellipsis\">" + obj.data.movie_duration + " / " + obj.data.movie_country + "</li>" +
-                        "<li class=\"ellipsis\">" + obj.data.releaseDate + "</li>" +
-                    "<ul>");
-                    infoNum.append("<span class=\"stonefont\">" + obj.data.movie_score + "</span>");
-                    scoreNum.append("<span class=\"stonefont\">" + obj.data.movie_commentCount + "</span>人评分");
+                        "<h3 class=\"name\">" + obj.data.movieCnName + "</h3>" +
+                        "<div class=\"ename ellipsis\">" + obj.data.movieFgName + "</div>" +
+                        "<ul>" +
+                        "<li class=\"ellipsis\">" + obj.data.typeName + "</li>" +
+                        "<li class=\"ellipsis\">" + obj.data.movieDuration + " / " + obj.data
+                        .countryName + "</li>" +
+                        "<li class=\"ellipsis\">" + obj.data.movieReleasedate + "</li>" +
+                        "<ul>");
+                    infoNum.append("<span class=\"stonefont\">" + obj.data.movieScore + "</span>");
+                    scoreNum.append("<span class=\"stonefont\">" + obj.data.movieCommentcount +
+                        "</span>人评分");
                     stonefontNum.append("<span class=\"stonefont\">" + StonefontTemp + "</span>");
-                    actionBuyBtn.append("<a class=\"btn buy\" href=\"./movieDetail.jsp?movie_id=" + movie_id + "\" data-act=\"more-detail-click\">查看更多电影详情</a>");
-                    layui.use('rate', function(){
+                    actionBuyBtn.append("<a class=\"btn buy\" href=\"./movieDetail.html?movie_id=" +
+                        movieId + "\" data-act=\"more-detail-click\">查看更多电影详情</a>");
+                    layui.use('rate', function () {
                         var rate = layui.rate;
                         rate.render({
-                            elem: '#MovieScore'
-                            ,value: (obj.data.movie_score / 2)
-                            ,half: true
-                            ,readonly: true
+                            elem: '#MovieScore',
+                            value: (obj.data.movieScore / 2),
+                            half: true,
+                            readonly: true
                         })
                     });
                     initList(obj);
@@ -225,38 +233,43 @@
             });
         }
         //评分
-        function giveScore(){
-            layui.use(['rate','layer'], function(){
+        function giveScore() {
+            layui.use(['rate', 'layer'], function () {
                 var layer = layui.layer;
                 var rate = layui.rate;
                 layer.open({
-                    type: 1
-                    ,title: "电影评分"
-                    ,closeBtn: false
-                    ,area: '400px;'
-                    ,shade: 0.8
-                    ,offset: clientHeight/5
-                    ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
-                    ,btn: ['确认评分', '取消']
-                    ,yes: function(){
-                        layer.alert('感谢你的评价,祝你生活愉快！',{icon: 0,offset: clientHeight/5},
-                            function (){
+                    type: 1,
+                    title: "电影评分",
+                    closeBtn: false,
+                    area: '400px;',
+                    shade: 0.8,
+                    offset: clientHeight / 5,
+                    id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                        ,
+                    btn: ['确认评分', '取消'],
+                    yes: function () {
+                        layer.alert('感谢你的评价,祝你生活愉快！', {
+                                icon: 0,
+                                offset: clientHeight / 5
+                            },
+                            function () {
                                 layer.closeAll();
                                 location.reload();
                             }
                         );
-                    }
-                    ,btnAlign: 'c'
-                    ,moveType: 0 //拖拽模式，0或者1
-                    ,content: ScoreHtml
-                    ,success: function(layero){
+                    },
+                    btnAlign: 'c',
+                    moveType: 0 //拖拽模式，0或者1
+                        ,
+                    content: ScoreHtml,
+                    success: function (layero) {
                         rate.render({
-                            elem: '#GiveScore'
-                            ,value: 4.5
-                            ,half: true
-                            ,text: true
-                            ,setText: function(value){
-                                this.span.text(value*2+"分");
+                            elem: '#GiveScore',
+                            value: 4.5,
+                            half: true,
+                            text: true,
+                            setText: function (value) {
+                                this.span.text(value * 2 + "分");
                             }
                         })
                     }
@@ -264,12 +277,15 @@
             });
         }
         //想看
-        function wantSee(){
-            layui.use(['rate','layer'], function(){
+        function wantSee() {
+            layui.use(['rate', 'layer'], function () {
                 var layer = layui.layer;
                 var rate = layui.rate;
-                layer.alert('感谢你的支持！',{icon: 0,offset: clientHeight/5},
-                    function (){
+                layer.alert('感谢你的支持！', {
+                        icon: 0,
+                        offset: clientHeight / 5
+                    },
+                    function () {
                         layer.closeAll();
                         location.reload();
                     }
@@ -278,7 +294,7 @@
         }
 
         //初始化标签和分页
-        function initTags(){
+        function initTags() {
             var Data = new Date();
             var Month = Data.getMonth() + 1;
             var Day = Data.getDate();
@@ -286,212 +302,234 @@
                 tagsBrand = $(".tags-brand"),
                 tagsArea = $(".tags-area"),
                 tagsHall = $(".tags-hall");
-            var DateStr = ["今天","明天","后天","大后天"],
-                BrandStr = ["全部","金逸影院","大地影院","中影国际影院","万达影城","CGV影城","恒大影城","五月花电影城","博纳国际影城","星美国际影城","比高电影城"],
-                AreaStr = ["全部","小榄","石岐区","五桂山区","火炬开发区","西区","古镇","南朗镇","三乡镇","东凤镇","阜沙镇","大涌镇"],
-                HallStr = ["全部","普通厅","IMAX厅","CGS中国巨幕厅","杜比全景声厅","DTS:X临境音厅","4K厅","4D厅"];
+            var DateStr = ["今天", "明天", "后天", "大后天"],
+                BrandStr = ["全部", "金逸影院", "大地影院", "中影国际影院", "万达影城", "CGV影城", "恒大影城", "五月花电影城", "博纳国际影城", "星美国际影城",
+                    "比高电影城"
+                ],
+                AreaStr = ["全部", "小榄", "石岐区", "五桂山区", "火炬开发区", "西区", "古镇", "南朗镇", "三乡镇", "东凤镇", "阜沙镇", "大涌镇"],
+                HallStr = ["全部", "普通厅", "IMAX厅", "CGS中国巨幕厅", "杜比全景声厅", "DTS:X临境音厅", "4K厅", "4D厅"];
+            var param = new baseAjax();
+            param.async = false;
+            param.url = url + "/movie/cinema/type/all";
+            ajax(param, function (data) {
+                BrandStr = data;
+            })
+            param.url = url + "/movie/hall/type/all";
+            ajax(param, function (data) {
+                HallStr = data;
+                console.log(HallStr);
+            })
+            param.url = url + "/area/city";
+            param.data = localInfomation.city;
+            param.contentType = "application/text"
+            param.dataType = "json"
+            param.method = "post";
+            ajax(param,function(data){
+                AreaStr = data;
+            })
             var DateActive = [],
                 BrandActive = [],
                 AreaActive = [],
                 HallActive = [];
-                PageActive = [];
-            var urlTemp = ["&date="+date,"&brand="+brand,"&area="+area,"&hall="+hall,"&page="+page];
-            DateActive = inputTags(DateStr.length, DateActive, date);
-            BrandActive = inputTags(BrandStr.length, BrandActive, brand);
-            AreaActive = inputTags(AreaStr.length, AreaActive, area);
-            HallActive = inputTags(AreaStr.length, HallActive, hall);
-            for(var i=0;i<DateStr.length;i++){
-                urlTemp[0] = "&date="+ i;
-                tagsDate.append(
-                    "<li " + DateActive[i] + ">" +
-                        "<a href=\"?movie_id="+ movie_id + urlTemp[0] + urlTemp[1] + urlTemp[2] + urlTemp[3] + urlTemp[4] +"\">"+
-                            DateStr[i] + " " + Month + "月" + (Day+i) +
-                        "</a>" +
+            for (var i = 0; i < DateStr.length; i++) {
+                if(i==0){
+                    tagsDate.append(
+                    "<li class='date active'>" +
+                    "<a href='#' onclick=tapChange(this)>" +
+                    DateStr[i] + " " + Month + "月" + (Day + i) +
+                    "</a>" +
                     "</li>"
                 );
+                }else{
+                    tagsDate.append(
+                    "<li class='date'>" +
+                    "<a href='#' onclick=tapChange(this)>" +
+                    DateStr[i] + " " + Month + "月" + (Day + i) +
+                    "</a>" +
+                    "</li>"
+                );
+                }
+                
             }
-            urlTemp = ["&date="+date,"&brand="+brand,"&area="+area,"&hall="+hall,"&page="+page];
-            for(var i=0;i<BrandStr.length;i++){
-                urlTemp[1] = "&brand="+ i;
+            for (var i = 0; i < BrandStr.length; i++) {
+
+                if (i == 0) {
+                    tagsBrand.append(
+                        "<li class='cinema active'>" +
+                        "<a href='#' onclick=tapChange(this)>全部</a>" +
+                        "</li>"
+                    );
+                }
                 tagsBrand.append(
-                    "<li " + BrandActive[i] + ">" +
-                        "<a href=\"?movie_id="+ movie_id + urlTemp[0] + urlTemp[1] + urlTemp[2] + urlTemp[3] + urlTemp[4] +"\">"+
-                            BrandStr[i] +
-                        "</a>" +
+                    "<li class='cinema' " + BrandActive[i] + ">" +
+                    "<a href='#' onclick=tapChange(this)>" +
+                    BrandStr[i].cinemaType +
+                    "</a>" +
                     "</li>"
                 );
             }
-            urlTemp = ["&date="+date,"&brand="+brand,"&area="+area,"&hall="+hall,"&page="+page];
-            for(var i=0;i<AreaStr.length;i++){
-                urlTemp[2] = "&area="+ i;
+            for (var i = 0; i < AreaStr.length; i++) {
+
+                if (i == 0) {
+                    tagsArea.append(
+                        "<li class='area active'>" +
+                        "<a href='#' onclick=tapChange(this)>全部</a>" +
+                        "</li>"
+                    );
+                }
+
                 tagsArea.append(
-                    "<li " + AreaActive[i] + ">" +
-                        "<a href=\"?movie_id="+ movie_id + urlTemp[0] + urlTemp[1] + urlTemp[2] + urlTemp[3] + urlTemp[4] +"\">"+
-                            AreaStr[i] +
-                        "</a>" +
+                    "<li class='area'>" +
+                    "<a href='#' onclick=tapChange(this)>" +
+                    AreaStr[i].areaName +
+                    "</a>" +
                     "</li>"
                 );
             }
-            urlTemp = ["&date="+date,"&brand="+brand,"&area="+area,"&hall="+hall,"&page="+page];
-            for(var i=0;i<HallStr.length;i++){
-                urlTemp[3] = "&hall="+ i;
+            for (var i = 0; i < HallStr.length; i++) {
+
+                if (i == 0) {
+                    tagsHall.append(
+                        "<li class='hall active'>" +
+                        "<a href='#' onclick=tapChange(this)>全部</a>" +
+                        "</li>"
+                    );
+                }
                 tagsHall.append(
-                    "<li " + HallActive[i] + ">" +
-                        "<a href=\"?movie_id="+ movie_id + urlTemp[0] + urlTemp[1] + urlTemp[2] + urlTemp[3] + urlTemp[4] +"\">"+
-                            HallStr[i] +
-                        "</a>" +
+                    "<li class='hall' " + HallActive[i] + ">" +
+                    "<a href='#' onclick=tapChange(this)>" +
+                    HallStr[i].hallName +
+                    "</a>" +
                     "</li>"
                 );
             }
 
-
-            // var listPager = $(".list-pager");
-            // var lengthtemp = 23;
-            // var PageNum = Math.floor(lengthtemp/10)+1;
-            // PageActive = inputTags(PageNum+1, PageActive, page);
-            // urlTemp = ["&date="+date,"&brand="+brand,"&area="+area,"&hall="+hall,"&page="+page];
-            // if(page != 1){
-            //     urlTemp[4] = "&page="+ (page-1);
-            //     listPager.append(
-            //         "<li>" +
-            //             "<a onclick=\"changePage(" + (page-1) + ")\" class=\"page\" href=\"?movie_id="+ movie_id + urlTemp[0] + urlTemp[1] + urlTemp[2] + urlTemp[3] + urlTemp[4] +"\">上一页</a>" +
-            //         "</li>"
-            //     );
-            // }
-            // for(var i = 1;i<PageNum+1;i++){
-            //     urlTemp[4] = "&page="+ i;
-            //     listPager.append(
-            //         "<li>" +
-            //             "<a onclick=\"changePage(" + i + ")\" "+ PageActive[i] + " href=\"?movie_id="+ movie_id + urlTemp[0] + urlTemp[1] + urlTemp[2] + urlTemp[3] + urlTemp[4] +"\">" + i + "</a>" +
-            //         "</li>"
-            //     );
-            // }
-            // if(page != PageNum){
-            //     urlTemp[4] = "&page=" + (page-'-1');
-            //     listPager.append(
-            //         "<li>" +
-            //             "<a onclick=\"changePage(" + (page-'-1') + ")\" class=\"page\" href=\"?movie_id="+ movie_id + urlTemp[0] + urlTemp[1] + urlTemp[2] + urlTemp[3] + urlTemp[4] +"\">下一页</a>" +
-            //         "</li>"
-            //     );
-            // }
         }
         //导入活跃标签
-        function inputTags(length, Active, tags){
-            for(var i=0;i<length;i++){
-                if(tags==null&&i==0){
-                    Active.push("class=\"active\"");
+        function tapChange(obj) {
+            var className = $(obj).parent("li").attr("class");
+            $("." + className).removeClass("active")
+            switch (className) {
+                case "date":
+                    date = $(obj).attr("val");
                     break;
-                }
-                if(i==tags){
-                    Active.push("class=\"active\"");
-                }
-                else
-                Active.push(" ");
+                case "cinema":
+                    cinema = $(obj).attr("val");
+                    break;
+                case "area":
+                    area = $(obj).attr("val");
+                    break;
+                case "hall":
+                    hall = $(obj).attr("val");
+                    break;
             }
-            return Active;
+            $(obj).parent("li").addClass("active");
         }
         //分页点击
-        function changePage(page){
+        function changePage(page) {
             console.log(page);
         }
 
         //初始化电影院列表
-        function initList(obj){
+        function initList(obj) {
             console.log(obj);
             var cinemasList = $(".cinemas-list");
-            var ListLength;       
+            var ListLength;
             var TempPrice = [];
             var MinPrice = [];
-            for(var i = 0;i< obj.cinemaList.length;i++){
+            for (var i = 0; i < obj.cinemaList.length; i++) {
                 var scheduleCount = 0;
-                for(var j = 0;j< obj.cinemaList[i].hallList.length;j++){
-                    if(obj.cinemaList[i].hallList[j].scheduleList.length ==0){
+                for (var j = 0; j < obj.cinemaList[i].hallList.length; j++) {
+                    if (obj.cinemaList[i].hallList[j].scheduleList.length == 0) {
                         scheduleCount++;
                     }
                 }
-                if(scheduleCount == obj.cinemaList[i].hallList.length){
-                    obj.cinemaList.splice(i,1);
+                if (scheduleCount == obj.cinemaList[i].hallList.length) {
+                    obj.cinemaList.splice(i, 1);
                 }
             }
             CinemaLength = obj.cinemaList.length;
-            for(var i=0;i<obj.cinemaList.length;i++){
+            for (var i = 0; i < obj.cinemaList.length; i++) {
                 TempPrice[i] = "";
-                for(var j=0;j<obj.cinemaList[i].hallList.length;j++){
-                    for(var p=0;p<obj.cinemaList[i].hallList[j].scheduleList.length;p++){
+                for (var j = 0; j < obj.cinemaList[i].hallList.length; j++) {
+                    for (var p = 0; p < obj.cinemaList[i].hallList[j].scheduleList.length; p++) {
                         TempPrice[i] += obj.cinemaList[i].hallList[j].scheduleList[p].schedule_price;
-                        TempPrice[i] += ",";                  
+                        TempPrice[i] += ",";
                     }
                 }
-                TempPrice[i] = TempPrice[i].substr(0, TempPrice[i].length - 1);  
+                TempPrice[i] = TempPrice[i].substr(0, TempPrice[i].length - 1);
                 MinPrice[i] = TempPrice[i].split(',').sort();
             }
-            
 
 
-            if(obj.cinemaList.length<11){
+
+            if (obj.cinemaList.length < 11) {
                 ListLength = obj.cinemaList.length;
-            }
-            else{
+            } else {
                 ListLength = 10;
             }
-            for(var i=0;i<ListLength;i++){
+            for (var i = 0; i < ListLength; i++) {
                 cinemasList.append(
                     "<div class=\"cinema-cell\">" +
-                        "<div class=\"cinema-info\">" +
-                            "<a class=\"cinema-name\">" + obj.cinemaList[i].cinema_name + "</a>" +
-                            "<p class=\"cinema-address\">地址：" + obj.cinemaList[i].cinema_address + "</p>" +
-                        "</div>" +
-                        "<div class=\"buy-btn\">" +
-                            "<a href=\"./selectSeat.jsp?cinema_id=" + obj.cinemaList[i].cinema_id + "&movie_id=" + obj.data.movie_id + "\">选座购票</a>" +
-                        "</div>" +
-                        "<div class=\"price\">" +
-                            "<span class=\"rmb red\">￥</span>" +
-                            "<span class=\"price-num red\"><span class=\"stonefont\">"+ MinPrice[i].shift() +"</span></span>" +
-                            "<span style=\"margin-left:5px;\">起</span>" +
-                        "</div>" +
+                    "<div class=\"cinema-info\">" +
+                    "<a class=\"cinema-name\">" + obj.cinemaList[i].cinema_name + "</a>" +
+                    "<p class=\"cinema-address\">地址：" + obj.cinemaList[i].cinema_address + "</p>" +
+                    "</div>" +
+                    "<div class=\"buy-btn\">" +
+                    "<a href=\"./selectSeat.jsp?cinema_id=" + obj.cinemaList[i].cinema_id + "&movie_id=" + obj.data
+                    .movie_id + "\">选座购票</a>" +
+                    "</div>" +
+                    "<div class=\"price\">" +
+                    "<span class=\"rmb red\">￥</span>" +
+                    "<span class=\"price-num red\"><span class=\"stonefont\">" + MinPrice[i].shift() +
+                    "</span></span>" +
+                    "<span style=\"margin-left:5px;\">起</span>" +
+                    "</div>" +
                     "</div>"
                 );
             }
         }
 
         //初始化url参数
-        function initParams(){
-            if(getUrlParams('date') == null){
+        function initParams() {
+            if (getUrlParams('date') == null) {
                 date = "0";
-            }else{
+            } else {
                 date = getUrlParams('date');
             }
-            if(getUrlParams('brand') == null){
+            if (getUrlParams('brand') == null) {
                 brand = "0";
-            }else{
+            } else {
                 brand = getUrlParams('brand');
             }
-            if(getUrlParams('area') == null){
+            if (getUrlParams('area') == null) {
                 area = "0";
-            }else{
+            } else {
                 area = getUrlParams('area');
             }
-            if(getUrlParams('hall') == null){
+            if (getUrlParams('hall') == null) {
                 hall = "0";
-            }else{
+            } else {
                 hall = getUrlParams('hall');
             }
-            if(getUrlParams('page') == null){
+            if (getUrlParams('page') == null) {
                 page = "1";
-            }else{
+            } else {
                 page = getUrlParams('page');
             }
         }
         //获取url参数
         function getUrlParams(name) { // 不传name返回所有值，否则返回对应值
             var url = window.location.search;
-            if (url.indexOf('?') == 1) { return false; }
+            if (url.indexOf('?') == 1) {
+                return false;
+            }
             url = url.substr(1);
             url = url.split('&');
             var name = name || '';
             var nameres;
             // 获取全部参数及其值
-            for(var i=0;i<url.length;i++) {
+            for (var i = 0; i < url.length; i++) {
                 var info = url[i].split('=');
                 var obj = {};
                 obj[info[0]] = decodeURI(info[1]);
@@ -499,7 +537,7 @@
             }
             // 如果传入一个参数名称，就匹配其值
             if (name) {
-                for(var i=0;i<url.length;i++) {
+                for (var i = 0; i < url.length; i++) {
                     for (const key in url[i]) {
                         if (key == name) {
                             nameres = url[i][key];
@@ -512,10 +550,9 @@
             // 返回结果
             return nameres;
         }
-
-
     </script>
     <!-- ------------------------------------------------------------------- -->
 
 </body>
+
 </html>
