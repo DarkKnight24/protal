@@ -190,8 +190,10 @@
                         }
                         else{
                             localStorage.setItem("userJson",JSON.stringify(obj.data));
-                            window.location.href="./mainPage.html";
-
+                            if(obj.data.userRole==1||obj.data.userRole==0){
+                                window.location.href="./mainPage.html";
+                            }
+                            window.location.href="./cinemamanager.html";
                         }
                     },
                     error:function(){
@@ -233,7 +235,7 @@
                     dataType: "json",
                     success: function(data){
                         console.log(data);
-                        if(data == true){
+                        if(data.data == true){
                             window.alert("注册成功！");
                             window.location.href="./login.html";
                         }else{

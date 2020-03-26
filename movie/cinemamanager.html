@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="../static/bootstrap/js/jquery-3.3.1.min.js"></script>
+    <script src="../static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../static/js/header.js" charset="utf-8"></script>
+    <script src="../static/js/echarts.js" async></script>
+    <script src="../static/js/Api.js"></script>
+    <script src="../static/layui/layui.js" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="../static/css/manage.css">
+    <link rel="stylesheet" href="../static/layui/css/layui.css" media="all" />
+    <script src="../static/js/vue.js"></script>
+    <title>鹰眼电影-后台管理</title>
+</head>
+
+<!-- 场次管理 -->
+<script type="text/html" id="licensebar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">下架</a>
+</script>
+<script type="text/html" id="licensetoolbar">
+    <div class="layui-btn-container addbtn">
+        <button class="layui-btn layui-btn-warm layui-btn-sm" lay-event="licenseadd">添加许可</button>
+    </div>
+    <div class="licensecheck">
+        <input id="scheduletext" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入电影名"
+            class="layui-input">
+        <button class="layui-btn layui-btn-sm" lay-event="findschedulebtn">搜索</button>
+    </div>
+    <div class="licenseonall">
+        <button class="layui-btn layui-btn-sm" lay-event="scheduleonallbtn">显示上映</button>
+    </div>
+    <div class="licensedownall">
+        <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="licensedownallbtn">显示下架</button>
+    </div>
+</script>
+<script type="text/html" id="licensedownbar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+</script>
+
+<!-- 影院管理 -->
+<script type="text/html" id="cinema_tool_bar">
+    <div class="layui-btn-container addbtn">
+        <button class="layui-btn layui-btn-sm" lay-event="cinema_add" onclick="addCinema">添加影院</button>
+    </div>
+    <div class="cinema_search">
+        <input id="cinema_text" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入影院类别"
+            class="layui-input">
+        <button class="layui-btn layui-btn-sm" lay-event="find_cinema_btn">搜索</button>
+    </div>
+</script>
+
+<div id="cinema_add_layer" class="layui-form">
+    123
+</div>
+
+
+<!-- 主体 -->
+
+<body class="layui-layout-body">
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo">后台管理系统</div>
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">
+                        <img id="user-header" class="layui-nav-img">
+                    </a>
+                </li>
+                <li class="layui-nav-item"><a href="javascript:;">注销</a></li>
+            </ul>
+        </div>
+
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll">
+                <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                    <li class="layui-nav-item root">
+                        <a class="user-manage" href="javascript:;">用户管理</a>
+                    </li>
+                    <li class="layui-nav-item root">
+                        <a class="movie-manage" href="javascript:;">电影管理</a>
+                    </li>
+                    <li class="layui-nav-item root">
+                        <a class="license-manage" href="javascript:;">放映许可</a>
+                    </li>
+                    <li class="layui-nav-item cinema-manager">
+                        <a class="cinema-manage" href="javascript:;">影院管理</a>
+                    </li>
+                    <li class="layui-nav-item cinema-manager">
+                        <a class="hall-manage" href="javascript:;">影厅管理</a>
+                    </li>
+                    <li class="layui-nav-item cinema-manager">
+                        <a class="schedule-manage" href="javascript:;">场次管理</a>
+                    </li>
+                    <li class="layui-nav-item cinema-manager">
+                        <a class="order-manage" href="javascript:;">订单管理</a>
+                    </li>
+                    <li class="layui-nav-item root">
+                        <a class="comment-manage" href="javascript:;">评论管理</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a class="boxoffice-manage" href="javascript:;">票房统计</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="layui-body">
+
+            <!-- 用户管理 -->
+            <div class="manage-card root user-manage" style="display: none;">
+                <div class="userlist">
+                    用户管理
+                    <table class="layui-hide" id="user_table_id" lay-filter="UserTable" style="margin-right: 5%;">
+                    </table>
+                </div>
+            </div>
+            <!-- 电影管理 -->
+            <div class="manage-card root movie-manage" style="display: none;">
+                <div class="main-inner">
+                    <div class="addMovie">
+                        <img alt="" src="../static/images/addMovie.png" onclick="addConfirm(-1)" />
+                        <span>添加电影</span>
+                    </div>
+                    <div class="movie-grid">
+                        <div class="panel-header">
+                            <span class="panel-title"></span>
+                        </div>
+                        <div class="panel-content">
+                            <ul class="movies-list"></ul>
+                        </div>
+                    </div>
+                    <div class="page-navigation" id="movie-page"></div>
+                </div>
+            </div>
+            <!-- 放映许可 -->
+            <div class="manage-card root license-manage" style="display: none;">
+                放映许可
+                <!-- 许可列表 -->
+                <div class="Licenselist">
+                    <table class="layui-hide" id="License_table_id" lay-filter="LicenseTable" style="margin-right: 5%;">
+                    </table>
+                </div>
+            </div>
+            <!-- 影院管理 -->
+            <div class="manage-card cinema-manager cinema-manage" style="display: none;">
+                <!-- 影院列表 -->
+                <div class="cinemalist">
+                    <table class="layui-table"
+                        lay-data="{toolbar: '#cinema_tool_bar',url:url+'/movie/cinema',page:true,request:{pageName:'currentPage',limitName:'pageSize'}}"
+                        id="cinema_table_id" lay-filter="CinemaTable" style="margin-right: 5%;">
+                        <thead>
+                            <tr>
+                                <th lay-data="{align:'center'}">影院编号</th>
+                                <th lay-data="{align:'center'}">影院类别</th>
+                                <th lay-data="{align:'center'}">影院名称</th>
+                                <th lay-data="{align:'center'}">影院地址</th>
+                                <th lay-data="{align:'center'}">所属地区</th>
+                                <th lay-data="{align:'center'}">操作</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <!-- 影厅管理 -->
+            <div class="manage-card cinema-manager hall-manage" style="display: none;">
+                影厅管理
+                <!-- 影院列表 -->
+                <div class="halllist">
+                    <table class="layui-hide" id="hall_table_id" lay-filter="HallTable" style="margin-right: 5%;">
+                    </table>
+                </div>
+            </div>
+            <!-- 场次管理 -->
+            <div class="manage-card cinema-manager schedule-manage" style="display: none;">
+                <!-- 场次列表 -->
+                <div class="schedulelist">
+                    <table class="layui-hide" id="schedule_table_id" lay-filter="ScheduleTable"
+                        style="margin-right: 5%;"></table>
+                </div>
+            </div>
+            <!-- 订单管理 -->
+            <div class="manage-card cinema-manager order-manage" style="display: none;">
+                <!-- 场次列表 -->
+                <div class="orderlist">
+                    <table class="layui-hide" id="order_table_id" lay-filter="OrderTable" style="margin-right: 5%;">
+                    </table>
+                </div>
+            </div>
+            <!-- 评论管理 -->
+            <div class="manage-card root comment-manage" style="display: none;">
+                <!-- 场次列表 -->
+                <div class="commentlist">
+                    <table class="layui-hide" id="comment_table_id" lay-filter="CommentTable" style="margin-right: 5%;">
+                    </table>
+                </div>
+            </div>
+            <!-- 票房统计 -->
+            <div class="manage-card boxoffice-manage" style="display: none;">
+                <div id="aaa"></div>
+            </div>
+        </div>
+
+        <div class="layui-footer">
+            <!-- 底部固定区域 -->
+            © layui.com - 底部固定区域
+        </div>
+    </div>
+    <script>
+        var clientHeight = document.documentElement.clientHeight;
+        window.onload = function () {
+            var user = JSON.parse(localStorage.getItem("userJson"));
+            console.log(user.userRole)
+            if (user.userRole == 1) {
+                $(".cinema-manager").remove();
+                $("#user-header").parent("a").append("系统管理员：" + user.userName);
+                $(".root").parent("li").addClass("layui-this");
+                $(".manage-card.user-manage").attr("style", "display:block");
+            } else if (user.userRole == 2) {
+                $(".root").remove();
+                $("#user-header").parent("a").append("XX影院管理员：" + user.userName);
+                $(".cinema-manage").parent("li").addClass("layui-this");
+                $(".manage-card.cinema-manage").attr("style", "display:block");
+            }
+            $("#user-header").attr("src", user.userHeadImg);
+
+            layui.use(['element', 'table'], function () {
+                var element = layui.element;
+                var table = layui.table;
+
+                table.on("toolbar(CinemaTable)", function (obj) {
+                    if (obj.event == "cinema_add") {
+                        addCinema()
+                    }
+                });
+            });
+
+            initCard();
+        }
+
+        function initCard() {
+            $(".layui-nav-item").find("a").click(function () {
+                $(".manage-card").attr("style", "display:none")
+                var className = $(this).attr("class");
+                $("." + className).attr("style", "display:block")
+            })
+        }
+
+        function addCinema() {
+            layer.open({
+                type: 1,
+                title: "添加影院",
+                area: "400px;",
+                shade: 0.8,
+                offset: clientHeight / 10,
+                content: $("#cinema_add_layer"),
+                id: "cinema_add", //设定一个id，防止重复弹出
+                btn: ["确认添加", "取消"],
+                closeBtn: 0,
+                yes: function () {
+
+                },
+                success: function () {
+
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

@@ -6,6 +6,8 @@ function init_manage() {
     if (user_json.userRole == 1) {
         html = "<li><a href=\"./manage.html\" onclick=\"managePage()\">管理</a></li>"
         nav.append(html);
+    }else if(user_json.userRole == 2){
+        window.location.href = "./cinemamanager.html";
     }
 
     function managePage() {
@@ -206,7 +208,7 @@ function ReLogin() {
                 // });
                 localStorage.removeItem('userJson');
                 layer.closeAll();
-                window.location.href = "../../html/mainPage.html"
+                window.location.href = "./mainPage.html"
             }
         );
     });

@@ -307,9 +307,19 @@
 
 
 
-
-
-
+/************************ 影院管理 ******************************/
+.cinema_search{
+	margin-left: 30px;
+	width: 350px;
+	float: left;
+}
+#cinema_text{
+	float: left;
+	height: 30px;
+	width: 250px;
+	margin-right: 10px;
+	float: left;
+}
 
 
 /************************ 评论管理 ******************************/

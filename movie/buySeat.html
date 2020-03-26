@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,7 @@
     <script src="../static/bootstrap/js/jquery-3.3.1.min.js"></script>
     <script src="../static/bootstrap/js/bootstrap.min.js"></script>
 
-    <link rel="icon" type="image/x-icon" href="../static/images/logo.ico"/>
+    <link rel="icon" type="image/x-icon" href="../static/images/logo.ico" />
     <link rel="stylesheet" type="text/css" href="../static/css/header.css">
     <link rel="stylesheet" type="text/css" href="../static/css/buySeat.css">
     <link rel="stylesheet" type="text/css" href="../static/css/footer.css">
@@ -20,10 +21,11 @@
     <link rel="stylesheet" href="../static/layui/css/layui.css" media="all">
     <title>鹰眼电影-选位置</title>
 </head>
+
 <body>
     <!-- ------------------------------------------------------------------- -->
     <!-- 导航栏 -->
-    <jsp:include page="header.jsp"/>
+    <div id="header"></div>
 
     <!-- 占位符 -->
     <div style="margin-top: 90px;"></div>
@@ -90,7 +92,7 @@
                 </div>
                 <!-- 场次 -->
                 <div class="show-info">
-                    
+
                 </div>
                 <div class="ticket-info">
                     <div class="no-ticket" style="display: block;">
@@ -117,33 +119,39 @@
     </div>
 
     <!-- 脚 -->
-    <jsp:include page="footer.jsp"/>
+    <div id="footer"></div>
 
     <!-- ------------------------------------------------------------------- -->
     <script>
         var clientHeight = document.documentElement.clientHeight;
-        var SeatMax=0;
-        var PriceTemp=1;
+        var SeatMax = 0;
+        var PriceTemp = 1;
         var schedule_id = getUrlParams("schedule_id");
         var TempLength;
         var TempSeat = "";
-        var Seatrow = [], Seatcol = [];
+        var Seatrow = [],
+            Seatcol = [];
 
-        window.onload = function(){
+        window.onload = function () {
             initHeader();
             initEmail(); //邮箱
             initInformation(); //信息
+
+            $("#header").load("./header.html", function () {
+                initHeader();
+            })
+            $("#footer").load("./footer.html")
         }
 
         //初始化邮箱
-        function initEmail(){
+        function initEmail() {
             var user_name;
             var email = $(".email");
             email.append("<span class=\"email-num\">137***325@qq.com</span>");
         }
 
         //点击具体座位事件  
-        function buySeat(i,j){
+        function buySeat(i, j) {
             var row = $(".seats-wrapper").find(".row")[i].children[j];
             var flag = 0;
             var NoTicket = $(".no-ticket")[0];
@@ -153,58 +161,61 @@
             var TicketPrice = $(".price");
             var ConfirmBtn = $(".confirm-btn")[0];
             //座位不能大于四
-            if((SeatMax>3) && (row.className == "seat selectable")){
-                layui.use(['layer'], function(){
-                var layer = layui.layer;
-                    layer.alert('一次最多选四个座位！',{icon: 0,offset: clientHeight/5},
-                        function (){
+            if ((SeatMax > 3) && (row.className == "seat selectable")) {
+                layui.use(['layer'], function () {
+                    var layer = layui.layer;
+                    layer.alert('一次最多选四个座位！', {
+                            icon: 0,
+                            offset: clientHeight / 5
+                        },
+                        function () {
                             layer.closeAll();
                         }
                     );
                 });
             }
             //确定
-            if((SeatMax<4) && (row.className == "seat selectable")){
+            if ((SeatMax < 4) && (row.className == "seat selectable")) {
                 row.className = "seat selected";
                 SeatMax++;
                 flag = 1;
-                Ticket.append("<span class=\"ticket\" data-index=\"" + (i+1) + "-" + (j+1) + "\">" + (i+1) + "排" + (j+1) + "座</span>");
-                TicketPrice.text("￥"+PriceTemp*SeatMax);
+                Ticket.append("<span class=\"ticket\" data-index=\"" + (i + 1) + "-" + (j + 1) + "\">" + (i + 1) + "排" +
+                    (j + 1) + "座</span>");
+                TicketPrice.text("￥" + PriceTemp * SeatMax);
             }
             //取消
-            if((row.className == "seat selected") && (flag==0)){
-                TicketRemove = $("[data-index=" + (i+1) + "-" + (j+1) + "]");
+            if ((row.className == "seat selected") && (flag == 0)) {
+                TicketRemove = $("[data-index=" + (i + 1) + "-" + (j + 1) + "]");
                 row.className = "seat selectable";
                 SeatMax--;
                 TicketRemove[0].remove();
-                TicketPrice.text("￥"+PriceTemp*SeatMax);
+                TicketPrice.text("￥" + PriceTemp * SeatMax);
             }
-            if(SeatMax==0){
+            if (SeatMax == 0) {
                 NoTicket.style.display = "block";
                 HasTicket.style.display = "none";
                 ConfirmBtn.className = "confirm-btn disable";
-            }
-            else{
+            } else {
                 NoTicket.style.display = "none";
                 HasTicket.style.display = "block";
                 ConfirmBtn.className = "confirm-btn";
             }
         }
-    
+
         //初始化信息
-        function initInformation(){
+        function initInformation() {
             var movieInfo = $(".movie-info");
             var showInfo = $(".show-info");
             $.ajax({
-                type:'post',
+                type: 'post',
                 url: url + "/schedule/findScheduleById",
-                dataType:'json',
+                dataType: 'json',
                 data: {
                     schedule_id: schedule_id
                 },
-                success:function (obj) {
+                success: function (obj) {
                     TempLength = obj.data.orderList.length;
-                    for(var i=0;i<TempLength;i++){
+                    for (var i = 0; i < TempLength; i++) {
                         Seatrow[i] = obj.data.orderList[i].order_position.split("排")[0];
                         Seatcol[i] = obj.data.orderList[i].order_position.split("排")[1].split("座")[0];
                     }
@@ -212,49 +223,51 @@
                     PriceTemp = obj.data.schedule_price;
                     movieInfo.append(
                         "<div class=\"poster\">" +
-                            "<img src=\"" + obj.data.schedule_movie.movie_picture + "\">" +
+                        "<img src=\"" + obj.data.schedule_movie.movie_picture + "\">" +
                         "</div>" +
                         "<div class=\"content\">" +
-                            "<p class=\"name text-ellipsis\">" + obj.data.schedule_movie.movie_cn_name + "</p>" +
-                            "<div class=\"info-item\">" +
-                                "<span>类型：</span>" +
-                                "<span class=\"value\">" + obj.data.schedule_movie.movie_type + "</span>" +
-                            "</div>" +
-                            "<div class=\"info-item\">" +
-                                "<span>时长：</span>" +
-                                "<span class=\"value\">" + obj.data.schedule_movie.movie_duration + "</span>" +
-                            "</div>" +
+                        "<p class=\"name text-ellipsis\">" + obj.data.schedule_movie.movie_cn_name +
+                        "</p>" +
+                        "<div class=\"info-item\">" +
+                        "<span>类型：</span>" +
+                        "<span class=\"value\">" + obj.data.schedule_movie.movie_type + "</span>" +
+                        "</div>" +
+                        "<div class=\"info-item\">" +
+                        "<span>时长：</span>" +
+                        "<span class=\"value\">" + obj.data.schedule_movie.movie_duration + "</span>" +
+                        "</div>" +
                         "</div>"
                     );
                     showInfo.append(
                         "<div class=\"info-item\">" +
-                            "<span>影院：</span>" +
-                            "<span class=\"value\">" + obj.data.schedule_hall.hall_cinema.cinema_name + "</span>" +
+                        "<span>影院：</span>" +
+                        "<span class=\"value\">" + obj.data.schedule_hall.hall_cinema.cinema_name +
+                        "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
-                            "<span>影厅：</span>" +
-                            "<span class=\"value\">" +  obj.data.schedule_hall.hall_name + "</span>" +
+                        "<span>影厅：</span>" +
+                        "<span class=\"value\">" + obj.data.schedule_hall.hall_name + "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
-                            "<span>版本：</span>" +
-                            "<span class=\"value\">" +  obj.data.schedule_movie.movie_country + "</span>" +
+                        "<span>版本：</span>" +
+                        "<span class=\"value\">" + obj.data.schedule_movie.movie_country + "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
-                            "<span>场次：</span>" +
-                            "<span class=\"value\">" + obj.data.schedule_startTime + "</span>" +
+                        "<span>场次：</span>" +
+                        "<span class=\"value\">" + obj.data.schedule_startTime + "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
-                            "<span>票价：</span>" +
-                            "<span class=\"value\">￥" + obj.data.schedule_price + "/张</span>" +
+                        "<span>票价：</span>" +
+                        "<span class=\"value\">￥" + obj.data.schedule_price + "/张</span>" +
                         "</div>"
                     );
                     initSeat();
                 }
             });
         }
-    
+
         //初始化座位表
-        function initSeat(){
+        function initSeat() {
             var SeatRow = $(".row-id-container");
             var seat = $(".seats-wrapper");
             var row;
@@ -262,28 +275,25 @@
             var HtmlRowLast = "</div>";
             var HtmlSeat;
             var flag;
-            for(var i=0;i<12;i++)
-            {
+            for (var i = 0; i < 12; i++) {
                 SeatRow.append("<span class=\"row-id\">" + (i + 1) + "</span>");
                 seat.append(HtmlRowHead);
                 row = $(".seats-wrapper").find(".row").last();
-                for(var j=0;j<12;j++)
-                {
-                    if(TempLength==0){
-                        HtmlSeat = "<span class=\"seat selectable\" onclick=\"buySeat(" + i + "," + j +")\"></span>";
-                    }
-                    else{
+                for (var j = 0; j < 12; j++) {
+                    if (TempLength == 0) {
+                        HtmlSeat = "<span class=\"seat selectable\" onclick=\"buySeat(" + i + "," + j + ")\"></span>";
+                    } else {
                         flag = 0;
-                        for(var p=0;p<TempLength;p++){    
-                            if((Seatrow[p]==(i+1)) && (Seatcol[p]==(j+1))){
+                        for (var p = 0; p < TempLength; p++) {
+                            if ((Seatrow[p] == (i + 1)) && (Seatcol[p] == (j + 1))) {
                                 flag = 1;
                             }
                         }
-                        if(flag==1){
-                            HtmlSeat = "<span class=\"seat sold\" onclick=\"buySeat(" + i + "," + j +")\"></span>";
-                        }
-                        else{
-                            HtmlSeat = "<span class=\"seat selectable\" onclick=\"buySeat(" + i + "," + j +")\"></span>";
+                        if (flag == 1) {
+                            HtmlSeat = "<span class=\"seat sold\" onclick=\"buySeat(" + i + "," + j + ")\"></span>";
+                        } else {
+                            HtmlSeat = "<span class=\"seat selectable\" onclick=\"buySeat(" + i + "," + j +
+                                ")\"></span>";
                         }
                     }
                     row.append(HtmlSeat);
@@ -293,14 +303,14 @@
         }
 
         //确认选座
-        function confirm(){
+        function confirm() {
             var ticketContainer = $(".ticket-container").find(".ticket");
             var price = $(".price").html();
-            price = price.replace("￥","");
-            var TicketSeat="";
-            for(var i=0;i<ticketContainer.length;i++){
+            price = price.replace("￥", "");
+            var TicketSeat = "";
+            for (var i = 0; i < ticketContainer.length; i++) {
                 TicketSeat += ticketContainer[i].innerHTML;
-                if(i < (ticketContainer.length-1)){
+                if (i < (ticketContainer.length - 1)) {
                     TicketSeat += ",";
                 }
             }
@@ -308,21 +318,23 @@
             json.schedule_id = schedule_id;
             json.TicketSeat = TicketSeat;
             json.price = price;
-            localStorage.setItem("order",JSON.stringify(json));
-            window.location.href="./pay.jsp";
-           // window.location.href="./pay.jsp?schedule_id=" + schedule_id + "&TicketSeat=" + TicketSeat + "&price=" + price;
+            localStorage.setItem("order", JSON.stringify(json));
+            window.location.href = "./pay.jsp";
+            // window.location.href="./pay.jsp?schedule_id=" + schedule_id + "&TicketSeat=" + TicketSeat + "&price=" + price;
         }
 
         //获取url参数
         function getUrlParams(name) { // 不传name返回所有值，否则返回对应值
             var url = window.location.search;
-            if (url.indexOf('?') == 1) { return false; }
+            if (url.indexOf('?') == 1) {
+                return false;
+            }
             url = url.substr(1);
             url = url.split('&');
             var name = name || '';
             var nameres;
             // 获取全部参数及其值
-            for(var i=0;i<url.length;i++) {
+            for (var i = 0; i < url.length; i++) {
                 var info = url[i].split('=');
                 var obj = {};
                 obj[info[0]] = decodeURI(info[1]);
@@ -330,7 +342,7 @@
             }
             // 如果传入一个参数名称，就匹配其值
             if (name) {
-                for(var i=0;i<url.length;i++) {
+                for (var i = 0; i < url.length; i++) {
                     for (const key in url[i]) {
                         if (key == name) {
                             nameres = url[i][key];
@@ -343,8 +355,8 @@
             // 返回结果
             return nameres;
         }
-
     </script>
     <!-- ------------------------------------------------------------------- -->
 </body>
+
 </html>
