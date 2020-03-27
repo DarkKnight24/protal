@@ -48,14 +48,80 @@
         <button class="layui-btn layui-btn-sm" lay-event="cinema_add" onclick="addCinema">添加影院</button>
     </div>
     <div class="cinema_search">
-        <input id="cinema_text" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入影院类别"
+        <input id="cinema_text" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入"
             class="layui-input">
         <button class="layui-btn layui-btn-sm" lay-event="find_cinema_btn">搜索</button>
     </div>
 </script>
 
-<div id="cinema_add_layer" class="layui-form">
-    123
+<div id="cinema_add_layer" style="display: none;">
+    <h3 id="add_cinema_title">影院信息</h3>
+    <div class="layui-form cinema_info">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">影院名称：</label>
+            <div class="layui-input-block cinema_select">
+                <input id="cinema_name" name="title" lay-verify="title" autocomplete="off" placeholder="影院名称"
+                    class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">影院品牌：</label>
+            <div class="layui-input-block cinema_select">
+                <select id="cinema_brand">
+                    <option value="">请选择影院品牌</option>
+                    <option v-for="brand in brand" :value="brand.cinemaId">{{brand.cinemaType}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">所属地区：</label>
+                <div class="layui-input-inline three_select">
+                    <select id="province" lay-filter="province">
+                        <option value="">请选择省或直辖市</option>
+                        <option :value="province.id" v-for="province in provinces">{{province.areaName}}</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline three_select">
+                    <select id="city" lay-filter="city">
+                        <option value="">请选择城市</option>
+                        <option class="city" :value="city.id" v-for="city in citys">{{city.areaName}}</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline three_select">
+                    <select id="county">
+                        <option value="">请选择县或行政区</option>
+                        <option :value="county.id" v-for="county in countys">{{county.areaName}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">详细地址：</label>
+            <div class="layui-input-block cinema_select">
+                <input type="text" name="address" lay-verify="address" id="cinema_address" autocomplete="off"
+                    placeholder="影院详细地址" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-upload pictureside">
+        <p class="movie-picture">影院照片</p>
+        <div class="layui-upload-list">
+            <img class="layui-upload-img" id="cinema_image">
+            <p id="cinema_text"></p>
+        </div>
+
+        <div id="cinema_image_process" style="display: none;" class="layui-progress" lay-filter="cinema_image_process" lay-showPercent="true">
+            <div class="layui-progress-bar" lay-percent="0%"></div>
+        </div>
+        <div class="layui-progress-bar" lay-filter="cinema_image"></div>
+        <button type="button" class="layui-btn" id="cinema_file">
+            <i class="layui-icon">&#xe67c;</i>上传图片
+        </button>
+       
+        <input type="hidden" id="cinema_image_url">
+    </div>
 </div>
 
 
@@ -213,6 +279,34 @@
     </div>
     <script>
         var clientHeight = document.documentElement.clientHeight;
+
+        var brand = new Vue({
+            el: "#cinema_brand",
+            data: {
+                brand: null
+            }
+        });
+
+        var province = new Vue({
+            el: "#province",
+            data: {
+                provinces: null
+            }
+        });
+
+        var city = new Vue({
+            el: "#city",
+            data: {
+                citys: null
+            }
+        });
+
+        var county = new Vue({
+            el: "#county",
+            data: {
+                countys: null
+            }
+        });
         window.onload = function () {
             var user = JSON.parse(localStorage.getItem("userJson"));
             console.log(user.userRole)
@@ -229,18 +323,58 @@
             }
             $("#user-header").attr("src", user.userHeadImg);
 
-            layui.use(['element', 'table'], function () {
+            layui.use(['element', 'table', 'form', 'upload'], function () {
                 var element = layui.element;
                 var table = layui.table;
-
+                var form = layui.form;
+                var upload = layui.upload;
                 table.on("toolbar(CinemaTable)", function (obj) {
                     if (obj.event == "cinema_add") {
-                        addCinema()
+                        addCinema();
+                        form.render();
+                    }
+                });
+
+                form.on('select', function (pId) {
+                    var ajax_param = new baseAjax();
+                    ajax_param.url = url + "/area/select/by-pid/" + pId.value;
+                    ajax(ajax_param, (data) => {
+                        if (pId.elem == document.getElementById("province")) {
+                            city.citys = data;
+                        } else if (pId.elem == document.getElementById("city")) {
+                            county.countys = data;
+                        }
+
+                    });
+                    setTimeout(function () {
+                        form.render();
+                    }, 100)
+                })
+                console.log(city.citys);
+                var cinema_image = upload.render({
+                    elem: "#cinema_file",
+                    url: url + "/file/file-upload",
+                    done: function (res, index, upload) {
+                        $("#cinema_image_url").val(res.data);
+                    },
+                    choose: function (obj) {
+                        $("#cinema_image").removeAttr("src");
+                        obj.preview(function (index, file, result) {
+                            $("#cinema_image").attr("src", result);
+                        })
+                    },
+                    progress: function (n, elem) {
+                        $("#cinema_image_process").attr("style","margin-top:10px;");
+                        var percent = n + '%'; //获取进度百分比
+                        element.progress('cinema_image_process', percent); //可配合 layui 进度条元素使用
+                        console.log(elem);
                     }
                 });
             });
 
             initCard();
+            getCinemaBrand();
+            getArea(1);
         }
 
         function initCard() {
@@ -252,10 +386,11 @@
         }
 
         function addCinema() {
+
             layer.open({
                 type: 1,
                 title: "添加影院",
-                area: "400px;",
+                area: ['820px', '400px'],
                 shade: 0.8,
                 offset: clientHeight / 10,
                 content: $("#cinema_add_layer"),
@@ -263,12 +398,50 @@
                 btn: ["确认添加", "取消"],
                 closeBtn: 0,
                 yes: function () {
-
+                    var cinemaName = $("#cinema_name").val();
+                    var cinemaType = $("#cinema_brand").val();
+                    var belongArea = $("#county").val();
+                    var cinemaAddress = $("#cinema_address").val();
+                    var cinemaImageUrl = $("#cinema_image_url").val();
+                    var cinema = {"cinemaName":cinemaName,"cinemaType":cinemaType,"belongArea":belongArea,"cinemaAddress":cinemaAddress,"cinemaImageUrl":cinemaImageUrl};
+                    var param = new baseAjax();
+                    param.url=url+"/movie/cinema/insert";
+                    param.method="post";
+                    param.data = cinema;
+                    ajax(param,data=>{
+                        if(data){
+                            layer.msg("添加成功");  
+                        }           
+                    },function(){
+                        layer.msg("添加失败");
+                    });
+                    setTimeout(1000,function(){
+                        layer.closeAll();
+                    })
                 },
                 success: function () {
-
+                    $("#cinema_add_layer").attr("style", "display:block");
+                },
+                end: function () {
+                    location.reload();
                 }
             })
+        }
+
+        function getCinemaBrand() {
+            var ajax_param = new baseAjax();
+            ajax_param.url = url + "/movie/cinema/type/all";
+            ajax(ajax_param, (data) => {
+                brand.brand = data
+            });
+        }
+
+        function getArea(pId) {
+            var ajax_param = new baseAjax();
+            ajax_param.url = url + "/area/select/by-pid/" + pId;
+            ajax(ajax_param, (data) => {
+                province.provinces = data
+            });
         }
     </script>
 </body>
