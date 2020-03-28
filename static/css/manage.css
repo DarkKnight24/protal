@@ -320,7 +320,20 @@
 	margin-right: 10px;
 	float: left;
 }
-
+#add_cinema_title{
+	text-align: center;
+	font-size: 18px;
+	margin: 20px auto 20px;
+}
+.three_select{
+	width: 100px !important;
+}
+.cinema_select{
+	width: 320px !important;
+}
+.cinema_info{
+	width: 500px !important;
+}
 
 /************************ 评论管理 ******************************/
 .container .four .commentlist{
