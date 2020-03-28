@@ -79,31 +79,31 @@
             <div class="layui-side-scroll">
                 <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
                 <ul class="layui-nav layui-nav-tree" lay-filter="test">
-                    <li class="layui-nav-item root">
+                    <li class="layui-nav-item root" style="display: none;">
                         <a class="user-manage" href="javascript:;">用户管理</a>
                     </li>
-                    <li class="layui-nav-item root">
+                    <li class="layui-nav-item root" style="display: none;">
                         <a class="movie-manage" href="javascript:;">电影管理</a>
                     </li>
-                    <li class="layui-nav-item root">
+                    <li class="layui-nav-item root" style="display: none;">
                         <a class="license-manage" href="javascript:;">放映许可</a>
                     </li>
-                    <li class="layui-nav-item cinema-manager">
+                    <li class="layui-nav-item cinema-manager" style="display: none;">
                         <a class="cinema-manage" href="javascript:;">影院管理</a>
                     </li>
-                    <li class="layui-nav-item cinema-manager">
+                    <li class="layui-nav-item cinema-manager" style="display: none;">
                         <a class="hall-manage" href="javascript:;">影厅管理</a>
                     </li>
-                    <li class="layui-nav-item cinema-manager">
+                    <li class="layui-nav-item cinema-manager" style="display: none;">
                         <a class="schedule-manage" href="javascript:;">场次管理</a>
                     </li>
-                    <li class="layui-nav-item cinema-manager">
+                    <li class="layui-nav-item cinema-manager" style="display: none;">
                         <a class="order-manage" href="javascript:;">订单管理</a>
                     </li>
-                    <li class="layui-nav-item root">
+                    <li class="layui-nav-item root" style="display: none;">
                         <a class="comment-manage" href="javascript:;">评论管理</a>
                     </li>
-                    <li class="layui-nav-item">
+                    <li class="layui-nav-item" style="display: none;">
                         <a class="boxoffice-manage" href="javascript:;">票房统计</a>
                     </li>
                 </ul>
@@ -217,12 +217,12 @@
             var user = JSON.parse(localStorage.getItem("userJson"));
             console.log(user.userRole)
             if (user.userRole == 1) {
-                $(".cinema-manager").remove();
+                $(".layui-nav-item.root").attr("style","display:block;")
                 $("#user-header").parent("a").append("系统管理员：" + user.userName);
-                $(".root").parent("li").addClass("layui-this");
+                $(".user-manage").parent("li").addClass("layui-this");
                 $(".manage-card.user-manage").attr("style", "display:block");
             } else if (user.userRole == 2) {
-                $(".root").remove();
+                $(".layui-nav-item.cinema-manage").attr("style","display:block;")
                 $("#user-header").parent("a").append("XX影院管理员：" + user.userName);
                 $(".cinema-manage").parent("li").addClass("layui-this");
                 $(".manage-card.cinema-manage").attr("style", "display:block");
