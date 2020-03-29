@@ -45,13 +45,22 @@
 <!-- 影院管理 -->
 <script type="text/html" id="cinema_tool_bar">
     <div class="layui-btn-container addbtn">
-        <button class="layui-btn layui-btn-sm" lay-event="cinema_add" onclick="addCinema">添加影院</button>
+        <button class="layui-btn layui-btn-sm" lay-event="cinema_add">添加影院</button>
     </div>
     <div class="cinema_search">
         <input id="cinema_text" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入"
             class="layui-input">
         <button class="layui-btn layui-btn-sm" lay-event="find_cinema_btn">搜索</button>
     </div>
+</script>
+
+<script type="text/html" id="cinema_bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
+</script>
+
+<script type="text/html" id="cinema_table_image">
+    <img src="{{d.cinemaImageUrl}}">
 </script>
 
 <div id="cinema_add_layer" style="display: none;">
@@ -63,15 +72,6 @@
             <div class="layui-input-block cinema_select">
                 <input id="cinema_name" name="title" lay-verify="title" autocomplete="off" placeholder="影院名称"
                     class="layui-input">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">影院品牌：</label>
-            <div class="layui-input-block cinema_select">
-                <select id="cinema_brand">
-                    <option value="">请选择影院品牌</option>
-                    <option v-for="brand in brand" :value="brand.cinemaId">{{brand.cinemaType}}</option>
-                </select>
             </div>
         </div>
         <div class="layui-form-item">
@@ -112,18 +112,72 @@
             <p id="cinema_text"></p>
         </div>
 
-        <div id="cinema_image_process" style="display: none;" class="layui-progress" lay-filter="cinema_image_process" lay-showPercent="true">
+        <div id="cinema_image_process" style="display: none;" class="layui-progress" lay-filter="cinema_image_process"
+            lay-showPercent="true">
             <div class="layui-progress-bar" lay-percent="0%"></div>
         </div>
         <div class="layui-progress-bar" lay-filter="cinema_image"></div>
         <button type="button" class="layui-btn" id="cinema_file">
             <i class="layui-icon">&#xe67c;</i>上传图片
         </button>
-       
+
         <input type="hidden" id="cinema_image_url">
     </div>
 </div>
 
+<!-- 影厅管理 -->
+<script type="text/html" id="hall_tool_bar">
+    <div class="layui-btn-container addbtn">
+        <button class="layui-btn layui-btn-sm" lay-event="hall_add">添加影厅</button>
+    </div>
+    <div class="hall_search">
+        <input id="cinema_text" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入"
+            class="layui-input">
+        <button class="layui-btn layui-btn-sm" lay-event="find_hall_btn">搜索</button>
+    </div>
+</script>
+
+<script type="text/html" id="hall_bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
+</script>
+
+<div id="hall_add_layer" style="display: none;">
+    <h3 id="add_hall_title">影厅信息</h3>
+    <div class="layui-form">
+        <div class="layui-form-item add_hall">
+            <label class="layui-form-label">影厅名称：</label>
+            <div class="layui-input-block hall_select">
+                <input id="hall_name" name="title" lay-verify="title" autocomplete="off" placeholder="影厅名称"
+                    class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label add_hall">所属影院：</label>
+            <div class="layui-input-block hall_select">
+                <select id="cinema">
+                    <option value="">请选择影院</option>
+                    <option :value="cinema.id" v-for="cinema in cinemas">{{cinema.cinemaName}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label add_hall">影厅类别：</label>
+            <div class="layui-input-block hall_select">
+                <select id="hall_type">
+                    <option value="">请选择影厅类别</option>
+                    <option :value="hallType.id" v-for="hallType in hallTypes">{{hallType.hallName}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label add_hall">影厅容量：</label>
+            <div class="layui-input-block hall_select">
+                <input class="layui-input" lay-verify="number"  id="hall_capacity" placeholder="请输入影厅容量" type="number">
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- 主体 -->
 
@@ -217,17 +271,43 @@
             <div class="manage-card cinema-manager cinema-manage" style="display: none;">
                 <!-- 影院列表 -->
                 <div class="cinemalist">
-                    <table class="layui-table"
-                        lay-data="{toolbar: '#cinema_tool_bar',url:url+'/movie/cinema',page:true,request:{pageName:'currentPage',limitName:'pageSize'}}"
-                        id="cinema_table_id" lay-filter="CinemaTable" style="margin-right: 5%;">
+                    <table class="layui-table" lay-data="{id:'cinema_table',
+                        toolbar: '#cinema_tool_bar',
+                        url:url+'/movie/cinema/all',
+                        page:true,
+                        request:{pageName:'currentPage',limitName:'pageSize'},
+                        page: {
+                            layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                            curr: 1, //设定初始在第 1 页
+                            groups: 5, //只显示 5 个连续页码
+                            first: false, //显示首页
+                            last: false, //显示尾页
+                            limits: [10, 15, 20]
+                        },
+                        response: {
+                            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+                        },
+                        parseData: function (res) {
+                            return {
+                                code: res.code, //解析接口状态
+                                msg: res.msg, //解析提示文本
+                                count: res.data.total, //解析数据长度
+                                data: res.data.list //解析数据列表
+                            };
+                        }
+                        }" id="cinema_table_id" lay-filter="CinemaTable" style="margin-right: 5%;">
                         <thead>
                             <tr>
-                                <th lay-data="{align:'center'}">影院编号</th>
-                                <th lay-data="{align:'center'}">影院类别</th>
-                                <th lay-data="{align:'center'}">影院名称</th>
-                                <th lay-data="{align:'center'}">影院地址</th>
-                                <th lay-data="{align:'center'}">所属地区</th>
-                                <th lay-data="{align:'center'}">操作</th>
+                                <th lay-data="{field:'id',align:'center',unresize: true}">影院编号</th>
+                                <th lay-data="{field:'cinemaType',
+                                                align:'center',
+                                                unresize: true,
+                                                templet:'#cinema_table_image'
+                                                }">影院照片</th>
+                                <th lay-data="{field:'cinemaName',align:'center',unresize: true}">影院名称</th>
+                                <th lay-data="{field:'cinemaAddress',align:'center',unresize: true}">影院地址</th>
+                                <th lay-data="{field:'area',align:'center',unresize: true}">所属地区</th>
+                                <th lay-data="{align:'center',toolbar:'#cinema_bar',unresize: true}">操作</th>
                             </tr>
                         </thead>
                     </table>
@@ -235,10 +315,43 @@
             </div>
             <!-- 影厅管理 -->
             <div class="manage-card cinema-manager hall-manage" style="display: none;">
-                影厅管理
                 <!-- 影院列表 -->
                 <div class="halllist">
-                    <table class="layui-hide" id="hall_table_id" lay-filter="HallTable" style="margin-right: 5%;">
+                    <table class="layui-table" id="hall_table_id" lay-data="{id:'hall_table',
+                    toolbar: '#hall_tool_bar',
+                    url:url+'/movie/hall/all',
+                    page:true,
+                    request:{pageName:'currentPage',limitName:'pageSize'},
+                    page: {
+                        layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                        curr: 1, //设定初始在第 1 页
+                        groups: 5, //只显示 5 个连续页码
+                        first: false, //显示首页
+                        last: false, //显示尾页
+                        limits: [10, 15, 20]
+                    },
+                    response: {
+                        statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+                    },
+                    parseData: function (res) {
+                        return {
+                            code: res.code, //解析接口状态
+                            msg: res.msg, //解析提示文本
+                            count: res.data.total, //解析数据长度
+                            data: res.data.list //解析数据列表
+                        };
+                    }
+                    }" lay-filter="HallTable" style="margin-right: 5%;">
+                        <thead>
+                            <tr>
+                                <th lay-data="{field:'id',align:'center',unresize: true}">编号</th>
+                                <th lay-data="{field:'cinemaName',align:'center',unresize: true}">影院名称</th>
+                                <th lay-data="{field:'hallType',align:'center',unresize: true}">影厅类别</th>
+                                <th lay-data="{field:'hallName',align:'center',unresize: true}">影厅名称</th>
+                                <th lay-data="{field:'hallCapacity',align:'center',unresize: true}">影厅容量</th>
+                                <th lay-data="{align:'center',toolbar:'#hall_bar',unresize: true}">操作</th>
+                            </tr>
+                        </thead>
                     </table>
                 </div>
             </div>
@@ -279,7 +392,7 @@
     </div>
     <script>
         var clientHeight = document.documentElement.clientHeight;
-
+        var user = JSON.parse(localStorage.getItem("userJson"));
         var brand = new Vue({
             el: "#cinema_brand",
             data: {
@@ -307,17 +420,31 @@
                 countys: null
             }
         });
+
+        var cinema = new Vue({
+            el:"#cinema",
+            data:{
+                cinemas:null
+            }
+        })
+
+        var hallType = new Vue({
+            el:"#hall_type",
+            data:{
+                hallTypes:null
+            }
+        })
+
+
         window.onload = function () {
-            var user = JSON.parse(localStorage.getItem("userJson"));
-            console.log(user.userRole)
             if (user.userRole == 1) {
-                $(".layui-nav-item.root").attr("style","display:block;")
+                $(".layui-nav-item.root").attr("style", "display:block;")
                 $("#user-header").parent("a").append("系统管理员：" + user.userName);
                 $(".user-manage").parent("li").addClass("layui-this");
                 $(".manage-card.user-manage").attr("style", "display:block");
             } else if (user.userRole == 2) {
-                $(".layui-nav-item.cinema-manage").attr("style","display:block;")
-                $("#user-header").parent("a").append("XX影院管理员：" + user.userName);
+                $(".layui-nav-item.cinema-manager").attr("style", "display:block;")
+                $("#user-header").parent("a").append(user.cinemaType+"管理员：" + user.userName);
                 $(".cinema-manage").parent("li").addClass("layui-this");
                 $(".manage-card.cinema-manage").attr("style", "display:block");
             }
@@ -328,13 +455,8 @@
                 var table = layui.table;
                 var form = layui.form;
                 var upload = layui.upload;
-                table.on("toolbar(CinemaTable)", function (obj) {
-                    if (obj.event == "cinema_add") {
-                        addCinema();
-                        form.render();
-                    }
-                });
-
+                onCinemaTable(table, form);
+                onHallTable(table,form);
                 form.on('select', function (pId) {
                     var ajax_param = new baseAjax();
                     ajax_param.url = url + "/area/select/by-pid/" + pId.value;
@@ -349,8 +471,7 @@
                     setTimeout(function () {
                         form.render();
                     }, 100)
-                })
-                console.log(city.citys);
+                });
                 var cinema_image = upload.render({
                     elem: "#cinema_file",
                     url: url + "/file/file-upload",
@@ -364,7 +485,7 @@
                         })
                     },
                     progress: function (n, elem) {
-                        $("#cinema_image_process").attr("style","margin-top:10px;");
+                        $("#cinema_image_process").attr("style", "margin-top:10px;");
                         var percent = n + '%'; //获取进度百分比
                         element.progress('cinema_image_process', percent); //可配合 layui 进度条元素使用
                         console.log(elem);
@@ -374,9 +495,11 @@
 
             initCard();
             getCinemaBrand();
+            getCinema();
+            getHallType();
             getArea(1);
         }
-
+        //初始化选项卡
         function initCard() {
             $(".layui-nav-item").find("a").click(function () {
                 $(".manage-card").attr("style", "display:none")
@@ -384,7 +507,7 @@
                 $("." + className).attr("style", "display:block")
             })
         }
-
+        //添加影院事件
         function addCinema() {
 
             layer.open({
@@ -403,31 +526,193 @@
                     var belongArea = $("#county").val();
                     var cinemaAddress = $("#cinema_address").val();
                     var cinemaImageUrl = $("#cinema_image_url").val();
-                    var cinema = {"cinemaName":cinemaName,"cinemaType":cinemaType,"belongArea":belongArea,"cinemaAddress":cinemaAddress,"cinemaImageUrl":cinemaImageUrl};
+                    var cinema = {
+                        "cinemaName": cinemaName,
+                        "cinemaType": user.cinemaTypeId,
+                        "belongArea": belongArea,
+                        "cinemaAddress": cinemaAddress,
+                        "cinemaImageUrl": cinemaImageUrl
+                    };
                     var param = new baseAjax();
-                    param.url=url+"/movie/cinema/insert";
-                    param.method="post";
+                    param.url = url + "/movie/cinema/insert";
+                    param.method = "post";
                     param.data = cinema;
-                    ajax(param,data=>{
-                        if(data){
-                            layer.msg("添加成功");  
-                        }           
-                    },function(){
-                        layer.msg("添加失败");
+                    ajax(param, data => {
+                        if (data) {
+                            layer.msg("添加成功", {
+                                offset: clientHeight / 5
+                            });
+                        }
+                    }, function () {
+                        layer.msg("添加失败", {
+                            offset: clientHeight / 5
+                        });
                     });
-                    setTimeout(1000,function(){
+                    setTimeout(function () {
                         layer.closeAll();
-                    })
+                    },1000)
                 },
                 success: function () {
                     $("#cinema_add_layer").attr("style", "display:block");
                 },
                 end: function () {
-                    location.reload();
+                    $("#cinema_name").val(null);
+                    $("#cinema_brand").val("");
+                    $("#province").val("");
+                    $("#city").val("");
+                    $("#county").val("");
+                    $("#cinema_address").val();
+                    $("#cinema_image-url").val();
+                    $("#cinema_image").attr("src", "");
+                    $("#cinema_image_process").attr("style", "display:none;");
+                    $(".layui-progress-bar").attr("style", "width:0%;");
+                    $(".layui-progress-text").html("");
                 }
-            })
+            });
         }
-
+        //添加影厅事件
+        function addHall(){
+            layer.open({
+                type: 1,
+                title: "添加影厅",
+                area: ['450px', '400px'],
+                shade: 0.8,
+                offset: clientHeight / 10,
+                content: $("#hall_add_layer"),
+                id: "hall_add", //设定一个id，防止重复弹出
+                btn: ["确认添加", "取消"],
+                closeBtn: 0,
+                yes: function () {
+                    var cinemaName = $("#cinema_name").val();
+                    var cinemaType = $("#cinema_brand").val();
+                    var belongArea = $("#county").val();
+                    var cinemaAddress = $("#cinema_address").val();
+                    var cinemaImageUrl = $("#cinema_image_url").val();
+                    var cinema = {
+                        "cinemaName": cinemaName,
+                        "cinemaType": user.cinemaTypeId,
+                        "belongArea": belongArea,
+                        "cinemaAddress": cinemaAddress,
+                        "cinemaImageUrl": cinemaImageUrl
+                    };
+                    var param = new baseAjax();
+                    param.url = url + "/movie/cinema/insert";
+                    param.method = "post";
+                    param.data = cinema;
+                    ajax(param, data => {
+                        if (data) {
+                            layer.msg("添加成功", {
+                                offset: clientHeight / 5
+                            });
+                        }
+                    }, function () {
+                        layer.msg("添加失败", {
+                            offset: clientHeight / 5
+                        });
+                    });
+                    setTimeout(function () {
+                        layer.closeAll();
+                    },1000)
+                },
+                success: function () {
+                    $("#hall_add_layer").attr("style", "display:block");
+                },
+                end: function () {
+                    $("#hall_add_layer").attr("style", "display:none");
+                }
+            });
+        }
+        //更新影院
+        function updateCinema(data) {
+            layer.open({
+                type: 1,
+                title: "影院信息",
+                area: ['820px', '400px'],
+                shade: 0.8,
+                offset: clientHeight / 10,
+                content: $("#cinema_add_layer"),
+                id: "cinema_update", //设定一个id，防止重复弹出
+                btn: ["确认修改", "取消"],
+                closeBtn: 0,
+                yes: function () {
+                    var cinemaName = $("#cinema_name").val();
+                    var cinemaType = $("#cinema_brand").val();
+                    var belongArea = $("#county").val();
+                    var cinemaAddress = $("#cinema_address").val();
+                    var cinemaImageUrl = $("#cinema_image_url").val();
+                    var cinema = {
+                        "id": data.id,
+                        "cinemaName": cinemaName,
+                        "cinemaType": cinemaType,
+                        "belongArea": belongArea,
+                        "cinemaAddress": cinemaAddress,
+                        "cinemaImageUrl": cinemaImageUrl
+                    };
+                    var param = new baseAjax();
+                    param.url = url + "/movie/cinema/update";
+                    param.method = "post";
+                    param.data = cinema;
+                    ajax(param, data => {
+                        if (data) {
+                            layer.msg("修改成功", {
+                                offset: clientHeight / 5
+                            });
+                        } else {
+                            layer.msg("修改失败", {
+                                offset: clientHeight / 5
+                            });
+                        }
+                    }, function () {
+                        layer.msg("修改失败", {
+                            offset: clientHeight / 5
+                        });
+                    });
+                    setTimeout(function () {
+                        layer.closeAll();
+                    }, 1000);
+                    tableReload("cinema_table", {
+                        url: url + "/movie/cinema/all"
+                    });
+                },
+                success: function () {
+                    $("#cinema_add_layer").attr("style", "display:block");
+                    var param = new baseAjax();
+                    param.url = url + "/movie/cinema/detail/" + data.id;
+                    ajax(param, data => {
+                        console.log(data);
+                        $("#cinema_name").val(data.cinemaName);
+                        $("#cinema_brand").val(data.cinemaTypeId);
+                        $("#province").val(data.provinceId);
+                        $("#city").val(data.cityId);
+                        $("#county").val(data.countryId);
+                        $("#cinema_address").val(data.cinemaAddress);
+                        $("#cinema_image-url").val(data.cinemaImageUrl);
+                        $("#cinema_image").attr("src", data.cinemaImage);
+                    });
+                },
+                end: function () {
+                    $("#cinema_name").val(null);
+                    $("#cinema_brand").val("");
+                    $("#province").val("");
+                    $("#city").val("");
+                    $("#county").val("");
+                    $("#cinema_address").val();
+                    $("#cinema_image-url").val();
+                    $("#cinema_image").attr("src", "");
+                    $("#cinema_image_process").attr("style", "display:none;");
+                    $(".layui-progress-bar").attr("style", "width:0%;");
+                    $(".layui-progress-text").html("");
+                }
+            });
+        }
+        //列表刷新，仅限Html渲染
+        function tableReload(ID, options) {
+            layui.use('table', function () {
+                var table = layui.table;
+                table.reload(ID, options);
+            });
+        }
+        //获取影院品牌
         function getCinemaBrand() {
             var ajax_param = new baseAjax();
             ajax_param.url = url + "/movie/cinema/type/all";
@@ -435,12 +720,97 @@
                 brand.brand = data
             });
         }
-
+        //获取影院
+        function getCinema(){
+            var ajax_param = new baseAjax();
+            ajax_param.url = url + "/movie/cinema/get-cinema/"+user.cinemaTypeId;
+            ajax(ajax_param, (data) => {
+                cinema.cinemas = data
+            });
+        }
+        //获取影院品牌
+        function getHallType(){
+            var ajax_param = new baseAjax();
+            ajax_param.url = url + "/movie/hall/type/all";
+            ajax(ajax_param, (data) => {
+                hallType.hallTypes = data
+            });
+        }
+        //根据父Id获取地区
         function getArea(pId) {
             var ajax_param = new baseAjax();
             ajax_param.url = url + "/area/select/by-pid/" + pId;
             ajax(ajax_param, (data) => {
                 province.provinces = data
+            });
+        }
+        //监听影院列表事件
+        function onCinemaTable(table, form) {
+            table.on("tool(CinemaTable)", function (obj) {
+                var data = obj.data;
+                console.log(data);
+                if (obj.event === "edit") {
+                    updateCinema(data);
+                    setTimeout(function () {
+                        form.render();
+                    }, 200);
+                } else if (obj.event === "delete") {
+                    layer.alert(
+                        "确定删除编号为“" + data.id + "”的影院吗？", {
+                            icon: 0,
+                            offset: clientHeight / 5
+                        },
+                        function () {
+                            var param = new baseAjax();
+                            param.url = url + "/movie/cinema/delete";
+                            param.type = "post";
+                            param.method = "post";
+                            param.data = {
+                                "id": data.id
+                            };
+                            param.contentTYpe = "application/json"
+                            console.log(param);
+                            ajax(param, data => {
+                                if (data) {
+                                    layer.msg("删除成功", {
+                                        offset: clientHeight / 5
+                                    });
+                                    tableReload('cinema_table', {
+                                        url: url + "/movie/cinema/all"
+                                    });
+                                } else {
+                                    layer.msg("删除失败", {
+                                        offset: clientHeight / 5
+                                    });
+                                }
+                                setTimeout(function () {
+                                    layer.closeAll();
+                                }, 500);
+                            }, function () {
+                                layer.msg("删除失败", {
+                                    offset: clientHeight / 5
+                                });
+                                setTimeout(function () {
+                                    layer.closeAll();
+                                }, 400);
+                            });
+                        });
+                }
+            });
+            table.on("toolbar(CinemaTable)", function (obj) {
+                if (obj.event === "cinema_add") {
+                    addCinema();
+                    form.render();
+                }
+            });
+        }
+        //监听影厅列表事件
+        function onHallTable(table,form){
+            table.on("toolbar(HallTable)", function (obj) {
+                if (obj.event === "hall_add") {
+                    addHall();
+                    form.render();
+                }
             });
         }
     </script>

@@ -10,7 +10,7 @@ class baseAjax{
         this.async = async==null?true:async;
         this.type = type==null||type==""?"get":type;
         this.url = url;
-        this.dataType = dataType;
+        this.dataType = "json";
         this.data = data;
         this.contentType = contentType;
         this.processData = processData;

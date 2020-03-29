@@ -2060,19 +2060,12 @@
                         groups: 5, //只显示 5 个连续页码
                         first: false, //显示首页
                         last: false, //显示尾页
-                        limits: [10, 15, 20],
-                        jump: function (obj, first) {
-                            var curr = obj.curr;
-                            if (!first) {
-                                initSchedule(curr);
-                            }
-                        }
+                        limits: [10, 15, 20]
                     },
                     response: {
                         statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
                     },
                     parseData: function (res) {
-                        //将原始数据解析成 table 组件所规定的数据
                         return {
                             code: res.code, //解析接口状态
                             msg: res.msg, //解析提示文本

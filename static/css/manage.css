@@ -334,7 +334,15 @@
 .cinema_info{
 	width: 500px !important;
 }
-
+/************************ 影厅管理 ******************************/
+#add_hall_title{
+	text-align: center;
+	font-size: 18px;
+	margin: 20px auto 20px;
+}
+.hall_select{
+	width: 300px !important;
+}
 /************************ 评论管理 ******************************/
 .container .four .commentlist{
 	margin-right: 40px;
