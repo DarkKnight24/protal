@@ -17,7 +17,7 @@
     <title>鹰眼电影-后台管理</title>
 </head>
 
-<!-- 场次管理 -->
+<!-- 许可管理 -->
 <script type="text/html" id="licensebar">
     <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
     <a class="layui-btn layui-btn-xs" lay-event="edit">下架</a>
@@ -131,7 +131,7 @@
         <button class="layui-btn layui-btn-sm" lay-event="hall_add">添加影厅</button>
     </div>
     <div class="hall_search">
-        <input id="cinema_text" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入"
+        <input id="hall_text" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入"
             class="layui-input">
         <button class="layui-btn layui-btn-sm" lay-event="find_hall_btn">搜索</button>
     </div>
@@ -173,10 +173,72 @@
         <div class="layui-form-item">
             <label class="layui-form-label add_hall">影厅容量：</label>
             <div class="layui-input-block hall_select">
-                <input class="layui-input" lay-verify="number"  id="hall_capacity" placeholder="请输入影厅容量" type="number">
+                <input class="layui-input" lay-verify="number" id="hall_capacity" placeholder="请输入影厅容量" type="number">
             </div>
         </div>
     </div>
+</div>
+
+<!-- 场次管理 -->
+<script type="text/html" id="schedule_tool_bar">
+    <div class="layui-btn-container addbtn">
+        <button class="layui-btn layui-btn-sm" lay-event="schedule_add">添加场次</button>
+    </div>
+    <div class="schedule_search">
+        <input id="schedule_text" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入"
+            class="layui-input">
+        <button class="layui-btn layui-btn-sm" lay-event="find_schedule_btn">搜索</button>
+    </div>
+</script>
+
+<script type="text/html" id="schedule_bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
+</script>
+
+<div id="schedule_add_layer" style="display: none;">
+    <h3 id="add_schedule_title">场次信息</h3>
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">放映电影：</label>
+            <div class="layui-input-block hall_select">
+                <select id="movie">
+                    <option value="">请选择电影</option>
+                    <option :value="movie.movieId" v-for="movie in movies">{{movie.movieCnName}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属影厅：</label>
+            <div class="layui-inline">
+                <div class="layui-input-inline two_select">
+                    <select id="schedule_cinema">
+                        <option value="">请选择影院</option>
+                        <option :value="cinema.id" v-for="cinema in cinemas">{{cinema.cinemaName}}</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline two_select">
+                    <select id="schedule_hall">
+                        <option value="">请选择影厅</option>
+                        <option :value="cinema.id" v-for="cinema in cinemas">{{cinema.cinemaName}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">放映时间：</label>
+            <div class="layui-input-block">
+                <input type="text" class="layui-input schedule_input" id="schedule_date">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">售价：</label>
+            <div class="layui-input-block">
+                <input type="text" class="layui-input schedule_input" id="price" placeholder="￥">
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- 主体 -->
@@ -359,8 +421,43 @@
             <div class="manage-card cinema-manager schedule-manage" style="display: none;">
                 <!-- 场次列表 -->
                 <div class="schedulelist">
-                    <table class="layui-hide" id="schedule_table_id" lay-filter="ScheduleTable"
-                        style="margin-right: 5%;"></table>
+                    <table class="layui-table" id="schedule_table_id" lay-data="{id:'schedule_table',
+                    toolbar: '#schedule_tool_bar',
+                    url:url+'/movie/schedule/all',
+                    page:true,
+                    request:{pageName:'currentPage',limitName:'pageSize'},
+                    page: {
+                        layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                        curr: 1, //设定初始在第 1 页
+                        groups: 5, //只显示 5 个连续页码
+                        first: false, //显示首页
+                        last: false, //显示尾页
+                        limits: [10, 15, 20]
+                    },
+                    response: {
+                        statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+                    },
+                    parseData: function (res) {
+                        return {
+                            code: res.code, //解析接口状态
+                            msg: res.msg, //解析提示文本
+                            count: res.data.total, //解析数据长度
+                            data: res.data.list //解析数据列表
+                        };
+                    }
+                    }" lay-filter="ScheduleTable" style="margin-right: 5%;">
+                        <thead>
+                            <tr>
+                                <th lay-data="{field:'id',align:'center',unresize: true}">场次编号</th>
+                                <th lay-data="{field:'cinemaType',align:'center',unresize: true}">影院名称</th>
+                                <th lay-data="{field:'cinemaName',align:'center',unresize: true}">电影名称</th>
+                                <th lay-data="{field:'cinemaAddress',align:'center',unresize: true}">上映时间</th>
+                                <th lay-data="{field:'area',align:'center',unresize: true}">售价</th>
+                                <th lay-data="{field:'area',align:'center',unresize: true}">剩余座位</th>
+                                <th lay-data="{align:'center',toolbar:'#cinema_bar',unresize: true}">操作</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
             </div>
             <!-- 订单管理 -->
@@ -386,8 +483,7 @@
         </div>
 
         <div class="layui-footer">
-            <!-- 底部固定区域 -->
-            © layui.com - 底部固定区域
+            © 鹰眼电影
         </div>
     </div>
     <script>
@@ -422,16 +518,16 @@
         });
 
         var cinema = new Vue({
-            el:"#cinema",
-            data:{
-                cinemas:null
+            el: "#cinema",
+            data: {
+                cinemas: null
             }
         })
 
         var hallType = new Vue({
-            el:"#hall_type",
-            data:{
-                hallTypes:null
+            el: "#hall_type",
+            data: {
+                hallTypes: null
             }
         })
 
@@ -444,19 +540,25 @@
                 $(".manage-card.user-manage").attr("style", "display:block");
             } else if (user.userRole == 2) {
                 $(".layui-nav-item.cinema-manager").attr("style", "display:block;")
-                $("#user-header").parent("a").append(user.cinemaType+"管理员：" + user.userName);
+                $("#user-header").parent("a").append(user.cinemaType + "管理员：" + user.userName);
                 $(".cinema-manage").parent("li").addClass("layui-this");
                 $(".manage-card.cinema-manage").attr("style", "display:block");
             }
             $("#user-header").attr("src", user.userHeadImg);
 
-            layui.use(['element', 'table', 'form', 'upload'], function () {
+            layui.use(['element', 'table', 'form', 'upload', 'laydate'], function () {
                 var element = layui.element;
                 var table = layui.table;
                 var form = layui.form;
                 var upload = layui.upload;
+                var laydate = layui.laydate;
+
                 onCinemaTable(table, form);
-                onHallTable(table,form);
+                onHallTable(table, form);
+                onScheduleTable(table, form);
+
+
+
                 form.on('select', function (pId) {
                     var ajax_param = new baseAjax();
                     ajax_param.url = url + "/area/select/by-pid/" + pId.value;
@@ -542,6 +644,9 @@
                             layer.msg("添加成功", {
                                 offset: clientHeight / 5
                             });
+                            tableReload("cinema_table", {
+                                url: url + "/movie/cinema/all"
+                            });
                         }
                     }, function () {
                         layer.msg("添加失败", {
@@ -550,7 +655,7 @@
                     });
                     setTimeout(function () {
                         layer.closeAll();
-                    },1000)
+                    }, 1000);
                 },
                 success: function () {
                     $("#cinema_add_layer").attr("style", "display:block");
@@ -571,7 +676,7 @@
             });
         }
         //添加影厅事件
-        function addHall(){
+        function addHall() {
             layer.open({
                 type: 1,
                 title: "添加影厅",
@@ -612,7 +717,7 @@
                     });
                     setTimeout(function () {
                         layer.closeAll();
-                    },1000)
+                    }, 1000)
                 },
                 success: function () {
                     $("#hall_add_layer").attr("style", "display:block");
@@ -621,6 +726,29 @@
                     $("#hall_add_layer").attr("style", "display:none");
                 }
             });
+        }
+        //添加场次事件
+        function addSchedule() {
+            layer.open({
+                type: 1,
+                title: "添加场次",
+                area: ['450px', '400px'],
+                shade: 0.8,
+                offset: clientHeight / 10,
+                content: $("#schedule_add_layer"),
+                id: "schedule_add", //设定一个id，防止重复弹出
+                btn: ["确认添加", "取消"],
+                closeBtn: 0,
+                success: function () {
+                    $("#schedule_add_layer").attr("style", "display:block");
+                    laydate.render({
+                        elem: "#schedule_date"
+                    });
+                },
+                end: function () {
+                    $("#hall_add_layer").attr("style", "display:none");
+                }
+            })
         }
         //更新影院
         function updateCinema(data) {
@@ -721,15 +849,15 @@
             });
         }
         //获取影院
-        function getCinema(){
+        function getCinema() {
             var ajax_param = new baseAjax();
-            ajax_param.url = url + "/movie/cinema/get-cinema/"+user.cinemaTypeId;
+            ajax_param.url = url + "/movie/cinema/get-cinema/" + user.cinemaTypeId;
             ajax(ajax_param, (data) => {
                 cinema.cinemas = data
             });
         }
         //获取影院品牌
-        function getHallType(){
+        function getHallType() {
             var ajax_param = new baseAjax();
             ajax_param.url = url + "/movie/hall/type/all";
             ajax(ajax_param, (data) => {
@@ -805,10 +933,19 @@
             });
         }
         //监听影厅列表事件
-        function onHallTable(table,form){
+        function onHallTable(table, form) {
             table.on("toolbar(HallTable)", function (obj) {
                 if (obj.event === "hall_add") {
                     addHall();
+                    form.render();
+                }
+            });
+        }
+        //监听场次列表事件
+        function onScheduleTable(table, form) {
+            table.on("toolbar(ScheduleTable)", function (obj) {
+                if (obj.event === "schedule_add") {
+                    addSchedule();
                     form.render();
                 }
             });

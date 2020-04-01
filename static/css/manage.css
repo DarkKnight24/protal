@@ -343,6 +343,33 @@
 .hall_select{
 	width: 300px !important;
 }
+#hall_text{
+	float: left;
+	height: 30px;
+	width: 250px;
+	margin-right: 10px;
+	float: left;
+}
+
+/************************ 场次管理 ******************************/
+#schedule_text{
+	float: left;
+	height: 30px;
+	width: 250px;
+	margin-right: 10px;
+	float: left;
+}
+.two_select{
+	width: 145px !important;
+}
+#add_schedule_title{
+	text-align: center;
+	font-size: 18px;
+	margin: 20px auto 20px;
+}
+.schedule_input{
+	width: 300px !important;
+}
 /************************ 评论管理 ******************************/
 .container .four .commentlist{
 	margin-right: 40px;
