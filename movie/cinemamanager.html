@@ -17,6 +17,22 @@
     <title>鹰眼电影-后台管理</title>
 </head>
 
+<!-- Vue注册组件 -->
+<script>
+    var cinemas;
+    Vue.component('cinema-option', {
+        template: '<option :value="cinema.id" v-for="cinema in cinemas">{{cinema.cinemaName}}</option>',
+        data:function(){
+            var ajax_param = new baseAjax();
+            ajax_param.url = url + "/movie/cinema/get-cinema/" + user.cinemaTypeId;
+            ajax(ajax_param, (data) => {
+                cinemas = data
+            });
+            return {cinemas:cinemas};
+        }
+    });
+</script>
+
 <!-- 许可管理 -->
 <script type="text/html" id="licensebar">
     <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
@@ -166,7 +182,7 @@
             <div class="layui-input-block hall_select">
                 <select id="hall_type">
                     <option value="">请选择影厅类别</option>
-                    <option :value="hallType.id" v-for="hallType in hallTypes">{{hallType.hallName}}</option>
+                    <option :value="hallType.hallId" v-for="hallType in hallTypes">{{hallType.hallName}}</option>
                 </select>
             </div>
         </div>
@@ -202,7 +218,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">放映电影：</label>
             <div class="layui-input-block hall_select">
-                <select id="movie">
+                <select id="cinema_movie">
                     <option value="">请选择电影</option>
                     <option :value="movie.movieId" v-for="movie in movies">{{movie.movieCnName}}</option>
                 </select>
@@ -406,11 +422,11 @@
                     }" lay-filter="HallTable" style="margin-right: 5%;">
                         <thead>
                             <tr>
-                                <th lay-data="{field:'id',align:'center',unresize: true}">编号</th>
-                                <th lay-data="{field:'cinemaName',align:'center',unresize: true}">影院名称</th>
-                                <th lay-data="{field:'hallType',align:'center',unresize: true}">影厅类别</th>
+                                <th lay-data="{field:'hallId',align:'center',unresize: true}">编号</th>
+                                <th lay-data="{field:'cinemaName',align:'center',unresize: true,sort:true}">影院名称</th>
+                                <th lay-data="{field:'hallType',align:'center',unresize: true,sort:true}">影厅类别</th>
                                 <th lay-data="{field:'hallName',align:'center',unresize: true}">影厅名称</th>
-                                <th lay-data="{field:'hallCapacity',align:'center',unresize: true}">影厅容量</th>
+                                <th lay-data="{field:'hallCapacity',align:'center',unresize: true,sort:true}">影厅容量</th>
                                 <th lay-data="{align:'center',toolbar:'#hall_bar',unresize: true}">操作</th>
                             </tr>
                         </thead>
@@ -495,42 +511,48 @@
                 brand: null
             }
         });
-
         var province = new Vue({
             el: "#province",
             data: {
                 provinces: null
             }
         });
-
         var city = new Vue({
             el: "#city",
             data: {
                 citys: null
             }
         });
-
         var county = new Vue({
             el: "#county",
             data: {
                 countys: null
             }
         });
-
         var cinema = new Vue({
             el: "#cinema",
             data: {
                 cinemas: null
             }
+        });
+        var schedule_cinema = new Vue({
+            el:"#schedule_cinema",
+            data:{
+                cinemas:null
+            }
         })
-
         var hallType = new Vue({
             el: "#hall_type",
             data: {
                 hallTypes: null
             }
         })
-
+        var cinema_movie = new Vue({
+            el:"#cinema_movie",
+            data:{
+                movies:null
+            }
+        });
 
         window.onload = function () {
             if (user.userRole == 1) {
@@ -558,7 +580,9 @@
                 onScheduleTable(table, form);
 
 
-
+                laydate.render({
+                    elem: "#schedule_date"
+                });
                 form.on('select', function (pId) {
                     var ajax_param = new baseAjax();
                     ajax_param.url = url + "/area/select/by-pid/" + pId.value;
@@ -688,22 +712,20 @@
                 btn: ["确认添加", "取消"],
                 closeBtn: 0,
                 yes: function () {
-                    var cinemaName = $("#cinema_name").val();
-                    var cinemaType = $("#cinema_brand").val();
-                    var belongArea = $("#county").val();
-                    var cinemaAddress = $("#cinema_address").val();
-                    var cinemaImageUrl = $("#cinema_image_url").val();
-                    var cinema = {
-                        "cinemaName": cinemaName,
-                        "cinemaType": user.cinemaTypeId,
-                        "belongArea": belongArea,
-                        "cinemaAddress": cinemaAddress,
-                        "cinemaImageUrl": cinemaImageUrl
+                    var hallName = $("#hall_name").val();
+                    var cinema = $("#cinema").val();
+                    var hallType = $("#hall_type").val();
+                    var hallCapacity = $("#hall_capacity").val();
+                    var hall = {
+                        "hallName": hallName,
+                        "cinemaId": cinema,
+                        "hallType": hallType,
+                        "hallCapacity": hallCapacity
                     };
                     var param = new baseAjax();
-                    param.url = url + "/movie/cinema/insert";
+                    param.url = url + "/movie/hall/insert";
                     param.method = "post";
-                    param.data = cinema;
+                    param.data = hall;
                     ajax(param, data => {
                         if (data) {
                             layer.msg("添加成功", {
@@ -724,6 +746,10 @@
                 },
                 end: function () {
                     $("#hall_add_layer").attr("style", "display:none");
+                    $("#hall_name").val(null);
+                    $("#cinema").val("");
+                    $("#hall_type").val("");
+                    $("#hall_capacity").val(null);
                 }
             });
         }
@@ -739,11 +765,9 @@
                 id: "schedule_add", //设定一个id，防止重复弹出
                 btn: ["确认添加", "取消"],
                 closeBtn: 0,
+                yes: function () {},
                 success: function () {
                     $("#schedule_add_layer").attr("style", "display:block");
-                    laydate.render({
-                        elem: "#schedule_date"
-                    });
                 },
                 end: function () {
                     $("#hall_add_layer").attr("style", "display:none");
@@ -853,7 +877,8 @@
             var ajax_param = new baseAjax();
             ajax_param.url = url + "/movie/cinema/get-cinema/" + user.cinemaTypeId;
             ajax(ajax_param, (data) => {
-                cinema.cinemas = data
+                cinema.cinemas = data;
+                schedule_cinema.cinemas = data;
             });
         }
         //获取影院品牌
@@ -871,6 +896,11 @@
             ajax(ajax_param, (data) => {
                 province.provinces = data
             });
+        }
+        
+        function getMovie(cinemaTypeId){
+            var param = new baseAjax();
+            param.url = url + "/movie/"
         }
         //监听影院列表事件
         function onCinemaTable(table, form) {
