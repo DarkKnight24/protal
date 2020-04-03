@@ -22,13 +22,15 @@
     var cinemas;
     Vue.component('cinema-option', {
         template: '<option :value="cinema.id" v-for="cinema in cinemas">{{cinema.cinemaName}}</option>',
-        data:function(){
+        data: function () {
             var ajax_param = new baseAjax();
             ajax_param.url = url + "/movie/cinema/get-cinema/" + user.cinemaTypeId;
             ajax(ajax_param, (data) => {
                 cinemas = data
             });
-            return {cinemas:cinemas};
+            return {
+                cinemas: cinemas
+            };
         }
     });
 </script>
@@ -269,7 +271,7 @@
                         <img id="user-header" class="layui-nav-img">
                     </a>
                 </li>
-                <li class="layui-nav-item"><a href="javascript:;">注销</a></li>
+                <li class="layui-nav-item"><a class="relogin" href="javascript:;" onclick="ReLogin()">注销</a></li>
             </ul>
         </div>
 
@@ -296,7 +298,7 @@
                         <a class="schedule-manage" href="javascript:;">场次管理</a>
                     </li>
                     <li class="layui-nav-item cinema-manager" style="display: none;">
-                        <a class="order-manage" href="javascript:;">订单管理</a>
+                        <a class="order-manage" href="javascript:;">退票管理</a>
                     </li>
                     <li class="layui-nav-item root" style="display: none;">
                         <a class="comment-manage" href="javascript:;">评论管理</a>
@@ -536,9 +538,9 @@
             }
         });
         var schedule_cinema = new Vue({
-            el:"#schedule_cinema",
-            data:{
-                cinemas:null
+            el: "#schedule_cinema",
+            data: {
+                cinemas: null
             }
         })
         var hallType = new Vue({
@@ -548,9 +550,9 @@
             }
         })
         var cinema_movie = new Vue({
-            el:"#cinema_movie",
-            data:{
-                movies:null
+            el: "#cinema_movie",
+            data: {
+                movies: null
             }
         });
 
@@ -628,6 +630,9 @@
         //初始化选项卡
         function initCard() {
             $(".layui-nav-item").find("a").click(function () {
+                if($(this).attr("class")=="relogin"){
+                    return;
+                }
                 $(".manage-card").attr("style", "display:none")
                 var className = $(this).attr("class");
                 $("." + className).attr("style", "display:block")
@@ -897,8 +902,8 @@
                 province.provinces = data
             });
         }
-        
-        function getMovie(cinemaTypeId){
+
+        function getMovie(cinemaTypeId) {
             var param = new baseAjax();
             param.url = url + "/movie/"
         }
@@ -979,6 +984,19 @@
                     form.render();
                 }
             });
+        }
+        //注销
+        function ReLogin() {
+            layer.alert('确认要注销吗？', {
+                    icon: 0,
+                    offset: clientHeight / 5
+                },
+                function () {
+                    localStorage.removeItem('userJson');
+                    layer.closeAll();
+                    window.location.href = "./login.html"
+                }
+            );
         }
     </script>
 </body>
