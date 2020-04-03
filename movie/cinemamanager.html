@@ -630,7 +630,7 @@
         //初始化选项卡
         function initCard() {
             $(".layui-nav-item").find("a").click(function () {
-                if($(this).attr("class")=="relogin"){
+                if ($(this).attr("class") == "relogin") {
                     return;
                 }
                 $(".manage-card").attr("style", "display:none")
@@ -902,7 +902,7 @@
                 province.provinces = data
             });
         }
-
+        //获取电影
         function getMovie(cinemaTypeId) {
             var param = new baseAjax();
             param.url = url + "/movie/"
