@@ -737,6 +737,7 @@
                                 offset: clientHeight / 5
                             });
                         }
+                        tableReload("hall_table",{url:url+'/movie/hall/all'});
                     }, function () {
                         layer.msg("添加失败", {
                             offset: clientHeight / 5
@@ -744,7 +745,7 @@
                     });
                     setTimeout(function () {
                         layer.closeAll();
-                    }, 1000)
+                    }, 1000);
                 },
                 success: function () {
                     $("#hall_add_layer").attr("style", "display:block");
