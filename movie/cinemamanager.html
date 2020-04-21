@@ -583,7 +583,9 @@
 
 
                 laydate.render({
-                    elem: "#schedule_date"
+                    elem: "#schedule_date",
+                    type: "datetime",
+                    value: new Date()
                 });
                 form.on('select', function (pId) {
                     var ajax_param = new baseAjax();
