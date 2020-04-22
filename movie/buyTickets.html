@@ -231,6 +231,10 @@
                     initList(obj);
                 }
             });
+        
+            var param = new baseAjax();
+            param.url = url + "/movie/cinema/all";
+            ajax(param,data=>{initList(data)});
         }
         //评分
         function giveScore() {
@@ -435,36 +439,36 @@
             console.log(obj);
             var cinemasList = $(".cinemas-list");
             var ListLength;
-            var TempPrice = [];
-            var MinPrice = [];
-            for (var i = 0; i < obj.cinemaList.length; i++) {
-                var scheduleCount = 0;
-                for (var j = 0; j < obj.cinemaList[i].hallList.length; j++) {
-                    if (obj.cinemaList[i].hallList[j].scheduleList.length == 0) {
-                        scheduleCount++;
-                    }
-                }
-                if (scheduleCount == obj.cinemaList[i].hallList.length) {
-                    obj.cinemaList.splice(i, 1);
-                }
-            }
-            CinemaLength = obj.cinemaList.length;
-            for (var i = 0; i < obj.cinemaList.length; i++) {
-                TempPrice[i] = "";
-                for (var j = 0; j < obj.cinemaList[i].hallList.length; j++) {
-                    for (var p = 0; p < obj.cinemaList[i].hallList[j].scheduleList.length; p++) {
-                        TempPrice[i] += obj.cinemaList[i].hallList[j].scheduleList[p].schedule_price;
-                        TempPrice[i] += ",";
-                    }
-                }
-                TempPrice[i] = TempPrice[i].substr(0, TempPrice[i].length - 1);
-                MinPrice[i] = TempPrice[i].split(',').sort();
-            }
+            // var TempPrice = [];
+            // var MinPrice = [];
+            // for (var i = 0; i < obj.cinemaList.length; i++) {
+            //     var scheduleCount = 0;
+            //     for (var j = 0; j < obj.cinemaList[i].hallList.length; j++) {
+            //         if (obj.cinemaList[i].hallList[j].scheduleList.length == 0) {
+            //             scheduleCount++;
+            //         }
+            //     }
+            //     if (scheduleCount == obj.cinemaList[i].hallList.length) {
+            //         obj.cinemaList.splice(i, 1);
+            //     }
+            // }
+            // CinemaLength = obj.cinemaList.length;
+            // for (var i = 0; i < obj.cinemaList.length; i++) {
+            //     TempPrice[i] = "";
+            //     for (var j = 0; j < obj.cinemaList[i].hallList.length; j++) {
+            //         for (var p = 0; p < obj.cinemaList[i].hallList[j].scheduleList.length; p++) {
+            //             TempPrice[i] += obj.cinemaList[i].hallList[j].scheduleList[p].schedule_price;
+            //             TempPrice[i] += ",";
+            //         }
+            //     }
+            //     TempPrice[i] = TempPrice[i].substr(0, TempPrice[i].length - 1);
+            //     MinPrice[i] = TempPrice[i].split(',').sort();
+            // }
 
 
 
-            if (obj.cinemaList.length < 11) {
-                ListLength = obj.cinemaList.length;
+            if (obj.list.length < 11) {
+                ListLength = obj.list.length;
             } else {
                 ListLength = 10;
             }
@@ -472,16 +476,15 @@
                 cinemasList.append(
                     "<div class=\"cinema-cell\">" +
                     "<div class=\"cinema-info\">" +
-                    "<a class=\"cinema-name\">" + obj.cinemaList[i].cinema_name + "</a>" +
-                    "<p class=\"cinema-address\">地址：" + obj.cinemaList[i].cinema_address + "</p>" +
+                    "<a class=\"cinema-name\">" + obj.list[i].cinemaName + "</a>" +
+                    "<p class=\"cinema-address\">地址：" + obj.list[i].cinemaAddress + "</p>" +
                     "</div>" +
                     "<div class=\"buy-btn\">" +
-                    "<a href=\"./selectSeat.jsp?cinema_id=" + obj.cinemaList[i].cinema_id + "&movie_id=" + obj.data
-                    .movie_id + "\">选座购票</a>" +
+                    "<a href=\"./selectSeat.jsp?cinema_id=" + obj.list[i].cinemaId + "&movie_id=" + movie_id + "\">选座购票</a>" +
                     "</div>" +
                     "<div class=\"price\">" +
                     "<span class=\"rmb red\">￥</span>" +
-                    "<span class=\"price-num red\"><span class=\"stonefont\">" + MinPrice[i].shift() +
+                    //"<span class=\"price-num red\"><span class=\"stonefont\">" + MinPrice[i].shift() +
                     "</span></span>" +
                     "<span style=\"margin-left:5px;\">起</span>" +
                     "</div>" +

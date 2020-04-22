@@ -96,19 +96,19 @@
             <div class="layui-inline">
                 <label class="layui-form-label">所属地区：</label>
                 <div class="layui-input-inline three_select">
-                    <select id="province" lay-filter="province">
+                    <select id="province" lay-filter="city_select">
                         <option value="">请选择省或直辖市</option>
                         <option :value="province.id" v-for="province in provinces">{{province.areaName}}</option>
                     </select>
                 </div>
                 <div class="layui-input-inline three_select">
-                    <select id="city" lay-filter="city">
+                    <select id="city" lay-filter="city_select">
                         <option value="">请选择城市</option>
                         <option class="city" :value="city.id" v-for="city in citys">{{city.areaName}}</option>
                     </select>
                 </div>
                 <div class="layui-input-inline three_select">
-                    <select id="county">
+                    <select id="county" lay-filter="city_select">
                         <option value="">请选择县或行政区</option>
                         <option :value="county.id" v-for="county in countys">{{county.areaName}}</option>
                     </select>
@@ -230,7 +230,7 @@
             <label class="layui-form-label">所属影厅：</label>
             <div class="layui-inline">
                 <div class="layui-input-inline two_select">
-                    <select id="schedule_cinema">
+                    <select id="schedule_cinema" lay-filter="cinema_select">
                         <option value="">请选择影院</option>
                         <option :value="cinema.id" v-for="cinema in cinemas">{{cinema.cinemaName}}</option>
                     </select>
@@ -238,7 +238,7 @@
                 <div class="layui-input-inline two_select">
                     <select id="schedule_hall">
                         <option value="">请选择影厅</option>
-                        <option :value="cinema.id" v-for="cinema in cinemas">{{cinema.cinemaName}}</option>
+                        <option :value="hall.hallId" v-for="hall in halls">{{hall.hallName}}</option>
                     </select>
                 </div>
             </div>
@@ -466,12 +466,12 @@
                     }" lay-filter="ScheduleTable" style="margin-right: 5%;">
                         <thead>
                             <tr>
-                                <th lay-data="{field:'id',align:'center',unresize: true}">场次编号</th>
-                                <th lay-data="{field:'cinemaType',align:'center',unresize: true}">影院名称</th>
-                                <th lay-data="{field:'cinemaName',align:'center',unresize: true}">电影名称</th>
-                                <th lay-data="{field:'cinemaAddress',align:'center',unresize: true}">上映时间</th>
-                                <th lay-data="{field:'area',align:'center',unresize: true}">售价</th>
-                                <th lay-data="{field:'area',align:'center',unresize: true}">剩余座位</th>
+                                <th lay-data="{field:'scheduleId',align:'center',unresize: true}">场次编号</th>
+                                <th lay-data="{field:'cinemaName',align:'center',unresize: true}">影院名称</th>
+                                <th lay-data="{field:'movieName',align:'center',unresize: true}">电影名称</th>
+                                <th lay-data="{field:'startTime',align:'center',unresize: true}">上映时间</th>
+                                <th lay-data="{field:'price',align:'center',unresize: true}">售价</th>
+                                <th lay-data="{field:'remainingSeat',align:'center',unresize: true}">剩余座位</th>
                                 <th lay-data="{align:'center',toolbar:'#cinema_bar',unresize: true}">操作</th>
                             </tr>
                         </thead>
@@ -555,6 +555,13 @@
                 movies: null
             }
         });
+        var hall = new Vue({
+            el:"#schedule_hall",
+            data:{
+                halls:null
+            }
+        })
+
 
         window.onload = function () {
             if (user.userRole == 1) {
@@ -587,7 +594,7 @@
                     type: "datetime",
                     value: new Date()
                 });
-                form.on('select', function (pId) {
+                form.on('select(city_select)', function (pId) {
                     var ajax_param = new baseAjax();
                     ajax_param.url = url + "/area/select/by-pid/" + pId.value;
                     ajax(ajax_param, (data) => {
@@ -597,6 +604,16 @@
                             county.countys = data;
                         }
 
+                    });
+                    setTimeout(function () {
+                        form.render();
+                    }, 100)
+                });
+                form.on('select(cinema_select)', function (cinema) {
+                    var ajax_param = new baseAjax();
+                    ajax_param.url = url + "/movie/hall/list?cinemaId=" + cinema.value;
+                    ajax(ajax_param, (data) => {
+                        hall.halls = data;
                     });
                     setTimeout(function () {
                         form.render();
@@ -626,6 +643,7 @@
             initCard();
             getCinemaBrand();
             getCinema();
+            getMovie(user.cinemaTypeId);
             getHallType();
             getArea(1);
         }
@@ -773,12 +791,43 @@
                 id: "schedule_add", //设定一个id，防止重复弹出
                 btn: ["确认添加", "取消"],
                 closeBtn: 0,
-                yes: function () {},
+                yes: function () {
+                    var movieId = $("#cinema_movie").val();
+                    var cinemaId = $("#schedule_cinema").val();
+                    var hall = $("#schedule_hall").val();
+                    var startTime = $("#schedule_date").val();
+                    var price = $("#price").val();
+                    var schedule = {"hallId":hall,"movieId":movieId,"scheduleStarttime":startTime,"schedulePrice":price}
+                    var param = new baseAjax();
+                    param.url = url + "/movie/schedule/insert";
+                    param.method = "post";
+                    param.data = schedule;
+                    ajax(param, data => {
+                        if (data) {
+                            layer.msg("添加成功", {
+                                offset: clientHeight / 5
+                            });
+                        }
+                        tableReload("schedule_table",{url:url+'/movie/schedule/all'});
+                    }, function () {
+                        layer.msg("添加失败", {
+                            offset: clientHeight / 5
+                        });
+                    });
+                    setTimeout(function () {
+                        layer.closeAll();
+                    }, 1000);
+                },
                 success: function () {
                     $("#schedule_add_layer").attr("style", "display:block");
                 },
                 end: function () {
                     $("#hall_add_layer").attr("style", "display:none");
+                    $("#cinema_movie").val("");
+                    $("#schedule_cinema").val("");
+                    $("#schedule_hall").val("");
+                    $("#schedule_date").val("");
+                    $("#price").val("");
                 }
             })
         }
@@ -908,7 +957,17 @@
         //获取电影
         function getMovie(cinemaTypeId) {
             var param = new baseAjax();
-            param.url = url + "/movie/"
+            param.url = url + "/movie/list/"+cinemaTypeId;
+            ajax(param,data=>{cinema_movie.movies=data;})
+
+        }
+        //获取影厅
+        function getHall(cinemaId){
+            var ajax_param = new baseAjax();
+            ajax_param.url = url + "/movie/hall/list/&cinemaId=" + cinemaId;
+            ajax(ajax_param, (data) => {
+                hall.halls = data
+            });
         }
         //监听影院列表事件
         function onCinemaTable(table, form) {

@@ -192,8 +192,9 @@
                             localStorage.setItem("userJson",JSON.stringify(obj.data));
                             if(obj.data.userRole==1||obj.data.userRole==0){
                                 window.location.href="./mainPage.html";
+                            }else{
+                                window.location.href="./cinemamanager.html";
                             }
-                            window.location.href="./cinemamanager.html";
                         }
                     },
                     error:function(){
