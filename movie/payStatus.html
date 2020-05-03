@@ -21,7 +21,7 @@
 <body>
 
     <!-- 导航栏 -->
-    <jsp:include page="header.jsp"/>
+    <div id="header"></div>
 
     <!-- 占位符 -->
     <div style="margin-top: 90px;"></div>
@@ -65,17 +65,20 @@
     </div>
 
     <!-- 脚 -->
-    <jsp:include page="footer.jsp"/>
+    <div id="footer"></div>
 
     <script>
         var clientHeight = document.documentElement.clientHeight;
 
         window.onload = function(){
-			 initHeader();
+            $("#header").load("./header.html", function () {
+                initHeader();
+            })
+            $("#footer").load("./footer.html")
         }
         
         function returnCenter(){
-            window.location.href = "./center.jsp"
+            window.location.href = "./center.html"
         }
 
     </script>

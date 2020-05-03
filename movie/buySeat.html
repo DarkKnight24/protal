@@ -124,6 +124,7 @@
     <!-- ------------------------------------------------------------------- -->
     <script>
         var clientHeight = document.documentElement.clientHeight;
+        var userInfo = JSON.parse(localStorage.getItem("userJson"));
         var SeatMax = 0;
         var PriceTemp = 1;
         var schedule_id = getUrlParams("schedule_id");
@@ -147,7 +148,7 @@
         function initEmail() {
             var user_name;
             var email = $(".email");
-            email.append("<span class=\"email-num\">137***325@qq.com</span>");
+            email.append("<span class=\"email-num\">"+userInfo.userEmail+"</span>");
         }
 
         //点击具体座位事件  
@@ -207,58 +208,55 @@
             var movieInfo = $(".movie-info");
             var showInfo = $(".show-info");
             $.ajax({
-                type: 'post',
-                url: url + "/schedule/findScheduleById",
+                type: 'get',
+                url: url + "/movie/schedule/detail/"+schedule_id,
                 dataType: 'json',
-                data: {
-                    schedule_id: schedule_id
-                },
                 success: function (obj) {
-                    TempLength = obj.data.orderList.length;
-                    for (var i = 0; i < TempLength; i++) {
-                        Seatrow[i] = obj.data.orderList[i].order_position.split("排")[0];
-                        Seatcol[i] = obj.data.orderList[i].order_position.split("排")[1].split("座")[0];
-                    }
+                    // TempLength = obj.data.orderList.length;
+                    // for (var i = 0; i < TempLength; i++) {
+                    //     Seatrow[i] = obj.data.orderList[i].order_position.split("排")[0];
+                    //     Seatcol[i] = obj.data.orderList[i].order_position.split("排")[1].split("座")[0];
+                    // }
                     console.log(obj);
-                    PriceTemp = obj.data.schedule_price;
+                    PriceTemp = obj.data.price;
                     movieInfo.append(
                         "<div class=\"poster\">" +
-                        "<img src=\"" + obj.data.schedule_movie.movie_picture + "\">" +
+                        "<img src=\"" + obj.data.movieDto.moviePicture + "\">" +
                         "</div>" +
                         "<div class=\"content\">" +
-                        "<p class=\"name text-ellipsis\">" + obj.data.schedule_movie.movie_cn_name +
+                        "<p class=\"name text-ellipsis\">" + obj.data.movieDto.movieCnName +
                         "</p>" +
                         "<div class=\"info-item\">" +
                         "<span>类型：</span>" +
-                        "<span class=\"value\">" + obj.data.schedule_movie.movie_type + "</span>" +
+                        "<span class=\"value\">" + obj.data.movieDto.typeName + "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
                         "<span>时长：</span>" +
-                        "<span class=\"value\">" + obj.data.schedule_movie.movie_duration + "</span>" +
+                        "<span class=\"value\">" + obj.data.movieDto.movieDuration + "</span>" +
                         "</div>" +
                         "</div>"
                     );
                     showInfo.append(
                         "<div class=\"info-item\">" +
                         "<span>影院：</span>" +
-                        "<span class=\"value\">" + obj.data.schedule_hall.hall_cinema.cinema_name +
+                        "<span class=\"value\">" + obj.data.cinemaName +
                         "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
                         "<span>影厅：</span>" +
-                        "<span class=\"value\">" + obj.data.schedule_hall.hall_name + "</span>" +
+                        "<span class=\"value\">" + obj.data.hallName + "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
                         "<span>版本：</span>" +
-                        "<span class=\"value\">" + obj.data.schedule_movie.movie_country + "</span>" +
+                        "<span class=\"value\">" + obj.data.movieDto.countryName + "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
                         "<span>场次：</span>" +
-                        "<span class=\"value\">" + obj.data.schedule_startTime + "</span>" +
+                        "<span class=\"value\">" + obj.data.startTime + "</span>" +
                         "</div>" +
                         "<div class=\"info-item\">" +
                         "<span>票价：</span>" +
-                        "<span class=\"value\">￥" + obj.data.schedule_price + "/张</span>" +
+                        "<span class=\"value\">￥" + obj.data.price + "/张</span>" +
                         "</div>"
                     );
                     initSeat();
@@ -315,11 +313,21 @@
                 }
             }
             var json = {};
-            json.schedule_id = schedule_id;
-            json.TicketSeat = TicketSeat;
-            json.price = price;
-            localStorage.setItem("order", JSON.stringify(json));
-            window.location.href = "./pay.jsp";
+            json.scheduleId = schedule_id;
+            json.orderPosition = TicketSeat;
+            json.orderPrice = price;
+            json.userId = userInfo.userId;
+            var param = new baseAjax();
+            param.url = url + "/order/insert";
+            param.method = "post";
+            param.data = json;
+            ajax(param,data=>{
+                if(data){
+                    localStorage.setItem("order", JSON.stringify(json));
+                    window.location.href = "./pay.html";
+                }
+            })
+            
             // window.location.href="./pay.jsp?schedule_id=" + schedule_id + "&TicketSeat=" + TicketSeat + "&price=" + price;
         }
 

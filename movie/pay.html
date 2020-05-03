@@ -21,7 +21,7 @@
 <body>
     <!-- ------------------------------------------------------------------- -->
     <!-- 导航栏 -->
-    <jsp:include page="header.jsp"/>
+    <div id="header"></div>
 
     <!-- 占位符 -->
     <div style="margin-top: 90px;"></div>
@@ -90,7 +90,7 @@
     </div>
 
     <!-- 脚 -->
-    <jsp:include page="footer.jsp"/>
+    <div id="footer"></div>
 
     <!-- ------------------------------------------------------------------- -->
     <script>
@@ -98,35 +98,35 @@
         var json = localStorage.getItem("order");
         json = eval('(' + json + ')');
         console.log(json);
-        var schedule_id = json.schedule_id;
+        var schedule_id = json.scheduleId;
         var payBtn = $(".pay-btn");
         window.onload = function(){
-            initHeader();
             initPay(); //支付
             timeDown(); //计时器
+            $("#header").load("./header.html", function () {
+                initHeader();
+            })
+            $("#footer").load("./footer.html")
         }
 
         //初始化支付页面
         function initPay(){
             var orderTable = $(".order-table").find("tbody");
-            var TempLength = json.TicketSeat.split(",");
+            var TempLength = json.orderPosition.split(",");
             console.log(TempLength);
-            var price = json.price;
+            var price = json.orderPrice;
             $.ajax({
-                type:'post',
-                url: url + "/schedule/findScheduleById",
+                type:'get',
+                url: url + "/movie/schedule/detail/"+schedule_id,
                 dataType:'json',
-                data: {
-                    schedule_id: schedule_id
-                },
                 success:function (obj) {
                     orderTable.append(
                         "<tr>" +
-                            "<td class=\"movie-name\">" + obj.data.schedule_movie.movie_cn_name + "</td>" +
-                            "<td class=\"showtime\">" + obj.data.schedule_startTime + "</td>" +
-                            "<td class=\"cinema-name\">" + obj.data.schedule_hall.hall_cinema.cinema_name + "</td>" +
+                            "<td class=\"movie-name\">" + obj.data.movieDto.movieCnName + "</td>" +
+                            "<td class=\"showtime\">" + obj.data.startTime + "</td>" +
+                            "<td class=\"cinema-name\">" + obj.data.cinemaName + "</td>" +
                             "<td>" +
-                                "<span class=\"hall\">" + obj.data.schedule_hall.hall_name + "</span>" +
+                                "<span class=\"hall\">" + obj.data.hallName + "</span>" +
                                 "<div class=\"seats\">" +
                                     "<div class=\"choiceseat\" style=\"display: block;\">" +
                                     "</div>" +
@@ -163,7 +163,7 @@
                 }
                 if((localStorage.second == "NaN") || (localStorage.second == 0 && localStorage.minute == 0))
                 {
-                    localStorage.minute = 14;
+                    localStorage.minute = 29;
                     localStorage.second = 59;
                 }
                 second = localStorage.second;
@@ -182,8 +182,8 @@
 
         //购买
         payBtn[0].onclick = function(){
-            var position = json.TicketSeat.split(",");
-            var price = json.price;
+            var position = json.orderPosition.split(",");
+            var price = json.orderPrice;
             $.ajax({
                 type: "post",
                 url: url + "/order/buyTickets",
@@ -201,7 +201,7 @@
                             layer.alert('购票成功！',{icon: 0,offset: clientHeight/5},
                                  function (){
                                     layer.closeAll();
-                                    document.location.href = "./payStatus.jsp";
+                                    document.location.href = "./payStatus.html";
                                  }
                             );
                         });
