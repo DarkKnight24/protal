@@ -323,7 +323,7 @@
             param.data = json;
             ajax(param,data=>{
                 if(data){
-                    localStorage.setItem("order", JSON.stringify(json));
+                    localStorage.setItem("order", JSON.stringify(data));
                     window.location.href = "./pay.html";
                 }
             })
