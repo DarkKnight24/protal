@@ -135,73 +135,66 @@
       var order = $(".one");
       var html;
       $.ajax({
-        type: "post",
-        url: url + "/order/findOrderByUserName",
+        type: "get",
+        url: url + "/order/all",
         dataType: "json",
         data: {
-          user_name: user.userName
+          userId: user.userId
         },
         success: function (obj) {
           // console.log(obj);
-          for (var i = 0; i < obj.data.length; i++) {
+          for (var i = 0; i < obj.data.list.length; i++) {
             //  var order_time = obj.data[i].order_schedule.schedule_startTime.slice(0,10);
-            var StateText;
-            switch (obj.data[i].order_state) {
-              case 0:
-                StateText = "退票中";
-                break;
-              case 1:
-                StateText = "已完成";
-                break;
-              case 2:
-                StateText = "已退票";
-                break;
+            var backetTicket = '';
+            if (obj.data.list[i].orderState == 1) {
+              backetTicket = '<div class="actions"><button class="layui-btn layui-btn-danger" onclick="backticket(\'' +
+                obj.data.list[i].orderId +
+                "','" +
+                obj.data.list[i].scheduleDto.startTime +
+                "','" +
+                obj.data.list[i].orderStatus +
+                '\')" style="cursor: pointer;text-align:center">申请退票</button></div>'
+            } else {
+              backetTicket = '<div class="actions"><button class="layui-btn layui-btn-disabled" style="text-align:center">申请退票</button></div>'
             }
             html =
               '<div class="order-box">' +
               '<div class="order-head">' +
               '<span class="order-date">' +
-              obj.data[i].order_time +
+              obj.data.list[i].createTime +
               "</span>" +
               '<span class="order-id">订单号：' +
-              obj.data[i].order_id +
+              obj.data.list[i].orderId +
               "</span>" +
               '<span class="order-delete">*</span>' +
               "</div>" +
               '<div class="order-body">' +
               '<div class="poster"><img src="' +
-              obj.data[i].order_schedule.schedule_movie.movie_picture +
+              obj.data.list[i].scheduleDto.movieDto.moviePicture +
               '"></div>' +
               '<div class="order-content">' +
               '<div class="movie-name">' +
-              obj.data[i].order_schedule.schedule_movie.movie_cn_name +
+              obj.data.list[i].scheduleDto.movieDto.movieCnName +
               "</div>" +
               ' <div class="cinema-name">' +
-              obj.data[i].order_schedule.schedule_hall.hall_cinema
-              .cinema_name +
+              obj.data.list[i].scheduleDto.cinemaName +
               "</div>" +
               '<div class="hall-ticket">' +
-              obj.data[i].order_schedule.schedule_hall.hall_name +
+              obj.data.list[i].scheduleDto.hallName +
               " " +
-              obj.data[i].order_position +
+              obj.data.list[i].orderPosition +
               "</div>" +
               '<div class="show-time">' +
-              obj.data[i].order_schedule.schedule_startTime +
+              obj.data.list[i].scheduleDto.startTime +
               "</div>" +
               "</div>" +
               '<div class="order-price">￥' +
-              obj.data[i].order_schedule.schedule_price +
+              obj.data.list[i].scheduleDto.price +
               "</div>" +
               '<div class="order-status">' +
-              StateText +
+              obj.data.list[i].orderStatus +
               "</div>" +
-              '<div class="actions"><a onclick="backticket(\'' +
-              obj.data[i].order_id +
-              "','" +
-              obj.data[i].order_schedule.schedule_startTime +
-              "','" +
-              StateText +
-              '\')" style="cursor: pointer;">申请退票</a></div>' +
+              backetTicket +
               "</div>" +
               "</div>";
             order.append(html);
