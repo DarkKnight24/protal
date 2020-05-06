@@ -147,15 +147,21 @@
             //  var order_time = obj.data[i].order_schedule.schedule_startTime.slice(0,10);
             var backetTicket = '';
             if (obj.data.list[i].orderState == 1) {
-              backetTicket = '<div class="actions"><button class="layui-btn layui-btn-danger" onclick="backticket(\'' +
+              backetTicket =
+                '<div class="actions"><button class="layui-btn layui-btn-danger" onclick="backticket(\'' +
                 obj.data.list[i].orderId +
                 "','" +
                 obj.data.list[i].scheduleDto.startTime +
                 "','" +
                 obj.data.list[i].orderStatus +
                 '\')" style="cursor: pointer;text-align:center">申请退票</button></div>'
-            } else {
-              backetTicket = '<div class="actions"><button class="layui-btn layui-btn-disabled" style="text-align:center">申请退票</button></div>'
+            }else if(obj.data.list[i].orderState == 3) {
+              backetTicket =
+                '<div class="actions"><a class="layui-btn layui-btn-normal" href="./pay.html?orderId="'+obj.data.list[i].orderId+' style="cursor: pointer;text-align:center">支付</a></div>'
+            }
+            else {
+              backetTicket =
+                '<div class="actions"><button class="layui-btn layui-btn-disabled" style="text-align:center">申请退票</button></div>'
             }
             html =
               '<div class="order-box">' +
@@ -251,48 +257,51 @@
               offset: clientHeight / 5
             });
           });
-        } else if (OldDate < NowDate) {
-          // window.alert("旧时间：" + OldDate + "\n新时间：" + NowDate + "\n退票时间为开场前1小时外，退票申请失败！");
-          layui.use(["layer"], function () {
-            var layer = layui.layer;
-            layer.alert("退票时间为开场前1小时外，退票申请失败！", {
+        }
+        // } else if (OldDate < NowDate) {
+        //   // window.alert("旧时间：" + OldDate + "\n新时间：" + NowDate + "\n退票时间为开场前1小时外，退票申请失败！");
+        //   layui.use(["layer"], function () {
+        //     var layer = layui.layer;
+        //     layer.alert("退票时间为开场前1小时外，退票申请失败！", {
+        //       icon: 0,
+        //       offset: clientHeight / 5
+        //     });
+        //   });
+        // } else {
+        // window.alert("旧时间：" + OldDate + "\n新时间：" + NowDate + "\n退票已申请");
+        layui.use(["layer"], function () {
+          var layer = layui.layer;
+          layer.alert(
+            "是否确认要申请退票！", {
               icon: 0,
               offset: clientHeight / 5
-            });
-          });
-        } else {
-          // window.alert("旧时间：" + OldDate + "\n新时间：" + NowDate + "\n退票已申请");
-          layui.use(["layer"], function () {
-            var layer = layui.layer;
-            layer.alert(
-              "是否确认要申请退票！", {
-                icon: 0,
-                offset: clientHeight / 5
-              },
-              function () {
-                $.ajax({
-                  type: "post",
-                  url: url + "/order/applyForRefund",
-                  dataType: "json",
-                  data: {
-                    order_id: order_id
-                  },
-                  success: function (obj) {
-                    if (obj.code == 0) {
-                      window.alert("退票已申请");
-                    } else {
-                      window.alert("退票申请失败！");
-                    }
+            },
+            function () {
+              $.ajax({
+                type: "post",
+                url: url + "/order/update",
+                dataType: "json",
+                data: {
+                  orderId: order_id,
+                  orderState: 0
+                },
+                success: function (obj) {
+                  if (obj.data) {
+                    window.alert("退票已申请");
+                  } else {
+                    window.alert("退票申请失败！");
                   }
-                });
-                layer.closeAll();
-                location.reload();
-              }
-            );
-          });
-        }
+                  layer.closeAll();
+                  location.reload();
+                }
+              });
+
+            }
+          );
+        });
       }
     }
+
 
     //初始化基本信息
     function initInformation() {
