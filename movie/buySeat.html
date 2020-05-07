@@ -324,7 +324,7 @@
             ajax(param,data=>{
                 if(data){
                     localStorage.setItem("order", JSON.stringify(data));
-                    window.location.href = "./pay.html";
+                    window.location.href = "./pay.html?orderId="+data.orderId;
                 }
             })
             
