@@ -91,6 +91,9 @@
 
 
 /************************ 电影管理 ******************************/
+.root.movie-manage{
+	margin-left: 40px;
+}
 .container .two .main-inner{
 	height: 1090px;
 	overflow-y: auto;

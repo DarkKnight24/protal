@@ -12,6 +12,7 @@
     <script src="../static/js/Api.js"></script>
     <script src="../static/layui/layui.js" charset="utf-8"></script>
     <link rel="stylesheet" type="text/css" href="../static/css/manage.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
     <link rel="stylesheet" href="../static/layui/css/layui.css" media="all" />
     <script src="../static/js/vue.js"></script>
     <title>鹰眼电影-后台管理</title>
@@ -310,7 +311,7 @@
             </div>
         </div>
 
-        <div class="layui-body">
+        <div class="layui-body container">
 
             <!-- 用户管理 -->
             <div class="manage-card root user-manage" style="display: none;">
@@ -321,7 +322,7 @@
                 </div>
             </div>
             <!-- 电影管理 -->
-            <div class="manage-card root movie-manage" style="display: none;">
+            <div class="manage-card root movie-manage two" style="display: none;">
                 <div class="main-inner">
                     <div class="addMovie">
                         <img alt="" src="../static/images/addMovie.png" onclick="addConfirm(-1)" />
@@ -332,7 +333,36 @@
                             <span class="panel-title"></span>
                         </div>
                         <div class="panel-content">
-                            <ul class="movies-list"></ul>
+                            <ul class="movies-list" id="movie_list">
+                                <li class="movie" v-for="movie in movies">
+                                    <div class="movie-item"><a href="javascript:void(0)" target="_blank"
+                                            data-act="playingMovie-click" data-val="8">
+                                            <div class="movie-poster"><img :src="movie.moviePicture"
+                                                    onclick="movieDetail('movie.movieId')" />
+                                                <div class="movie-overlay movie-overlay-bg">
+                                                    <div class="movie-info">
+                                                        <div class="movie-score"><i
+                                                                class="integer">{{movie.movieScore}}</i></div>
+                                                        <div class="movie-title movie-title-padding" title="">
+                                                            {{movie.movieCnName}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <div class="moive-btn">
+                                            <div class="movies-detail movie-detail-strong movie-sale">
+                                                <span id="detailId" style="display:none;">{{movie.movieId}}</span>
+                                                <a class="active" onclick="addConfirm(this)" target="_blank"
+                                                    data-act="salePlayingMovie-click" data-val="">修改</a></div>
+                                            <div class="movies-detail movie-detail-strong movie-sale"><span
+                                                    id="deleteId" style="display:none;">{{movie.movieId}}</span><a
+                                                    class="active" onclick="deleteConfirm(this)"
+                                                    data-act="salePlayingMovie-click" id="delete">下架</a></div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                     <div class="page-navigation" id="movie-page"></div>
@@ -555,10 +585,16 @@
                 movies: null
             }
         });
+        var movie = new Vue({
+            el: "#movie_list",
+            data: {
+                movies: null
+            }
+        })
         var hall = new Vue({
-            el:"#schedule_hall",
-            data:{
-                halls:null
+            el: "#schedule_hall",
+            data: {
+                halls: null
             }
         })
 
@@ -569,11 +605,13 @@
                 $("#user-header").parent("a").append("系统管理员：" + user.userName);
                 $(".user-manage").parent("li").addClass("layui-this");
                 $(".manage-card.user-manage").attr("style", "display:block");
+                getMovie();
             } else if (user.userRole == 2) {
                 $(".layui-nav-item.cinema-manager").attr("style", "display:block;")
                 $("#user-header").parent("a").append(user.cinemaType + "管理员：" + user.userName);
                 $(".cinema-manage").parent("li").addClass("layui-this");
                 $(".manage-card.cinema-manage").attr("style", "display:block");
+                getMovie(user.cinemaTypeId);
             }
             $("#user-header").attr("src", user.userHeadImg);
 
@@ -643,7 +681,6 @@
             initCard();
             getCinemaBrand();
             getCinema();
-            getMovie(user.cinemaTypeId);
             getHallType();
             getArea(1);
         }
@@ -757,7 +794,9 @@
                                 offset: clientHeight / 5
                             });
                         }
-                        tableReload("hall_table",{url:url+'/movie/hall/all'});
+                        tableReload("hall_table", {
+                            url: url + '/movie/hall/all'
+                        });
                     }, function () {
                         layer.msg("添加失败", {
                             offset: clientHeight / 5
@@ -797,7 +836,12 @@
                     var hall = $("#schedule_hall").val();
                     var startTime = $("#schedule_date").val();
                     var price = $("#price").val();
-                    var schedule = {"hallId":hall,"movieId":movieId,"scheduleStarttime":startTime,"schedulePrice":price}
+                    var schedule = {
+                        "hallId": hall,
+                        "movieId": movieId,
+                        "scheduleStarttime": startTime,
+                        "schedulePrice": price
+                    }
                     var param = new baseAjax();
                     param.url = url + "/movie/schedule/insert";
                     param.method = "post";
@@ -808,7 +852,9 @@
                                 offset: clientHeight / 5
                             });
                         }
-                        tableReload("schedule_table",{url:url+'/movie/schedule/all'});
+                        tableReload("schedule_table", {
+                            url: url + '/movie/schedule/all'
+                        });
                     }, function () {
                         layer.msg("添加失败", {
                             offset: clientHeight / 5
@@ -957,12 +1003,18 @@
         //获取电影
         function getMovie(cinemaTypeId) {
             var param = new baseAjax();
-            param.url = url + "/movie/list/"+cinemaTypeId;
-            ajax(param,data=>{cinema_movie.movies=data;})
+            if (cinemaTypeId != null)
+                param.url = url + "/movie/list/" + cinemaTypeId;
+            else
+                param.url = url + "/movie/find-all"
+            ajax(param, data => {
+                cinema_movie.movies = data;
+                movie.movies = data;
+            })
 
         }
         //获取影厅
-        function getHall(cinemaId){
+        function getHall(cinemaId) {
             var ajax_param = new baseAjax();
             ajax_param.url = url + "/movie/hall/list/&cinemaId=" + cinemaId;
             ajax(ajax_param, (data) => {
