@@ -105,7 +105,6 @@
         var payBtn = $(".pay-btn");
         window.onload = function () {
             initPay(); //支付
-            timeDown(); //计时器
             $("#header").load("./header.html", function () {
                 initHeader();
             })
@@ -148,7 +147,7 @@
                             i] + "</span>");
                     }
                     $(".price").html(price);
-                    timeDown(minute,second);
+                    timeDown(obj.data.minute,obj.data.second);
                 }
             });
 
